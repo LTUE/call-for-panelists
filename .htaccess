@@ -1,0 +1,6 @@
+AddHandler application/x-httpd-ea-php72 .php
+
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*$ index.php [L,QSA]

@@ -1,0 +1,77 @@
+body {
+    max-width: 80ch; /* readability - 50-80 chars */
+    margin: 0 auto;
+    padding: 0.5em;
+}
+
+label {
+    font-weight: bold;
+}
+input, output, textarea {
+    padding: 0.2em;
+}
+label, input, output {
+    display: block;
+    width: 30ch;
+}
+textarea, label.long {
+    width: 80ch;
+}
+textarea {
+    height: 8ex;
+}
+label {
+    margin-top: 1em;
+}
+label.required::after, p.required::after {
+    content: '*';
+    color: red;
+}
+output.error {
+    color: red;
+}
+input[type=submit], div.shrinkwrap {
+    margin-top: 0.3em;
+}
+input[type=radio] + label, input[type=checkbox] + label {
+    margin-top: 0;
+}
+input[type=radio], input[type=checkbox] {
+    width: auto;
+    float: left;
+}
+
+input[type=submit] {
+    margin-top: 1.5em;
+}
+
+dt {
+    float: left;
+}
+dt::after {
+    content: ':';
+}
+
+section.panel {
+    background-color: #F2F5F8;
+    padding: 0.5em;
+    overflow: auto; /* clear floats */
+}
+section.panel + section.panel {
+    margin-top: 0.3em;
+}
+section.panel h2 {
+    font-size: inherit;
+    font-weight: inherit;
+    margin-top: 0;
+}
+
+section.panel label {
+    width: 80%;
+    float: left;
+    margin-top: 0.3em;
+    display: inline-block;
+}
+section.panel select {
+    float: right;
+}
