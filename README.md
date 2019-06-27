@@ -1,17 +1,8 @@
 ## Goals
 
-* Login system, so they can resume
+* Register and login system, so they can resume
 * Multiple pages
 * Qualifications
-
-### Specific questions
-
-* May we share your contact info with other panelists?
-    * contact info
-* Name
-* Email (for account)
-* Panel interests
-    * Need to filter by tag, show decription
 
 ## Implementation Notes
 
@@ -25,3 +16,28 @@ Make sure you have database access from your home IP. Create an environment.conf
 
 * CSRF on all forms
 * Pull in real data from the spreadsheets
+* Social logins
+* Email - to confirm accounts, and
+* Password reset
+* Picture upload
+* The books/presentation requests
+* Input hours available, limiting shown panels to those
+* Test with bulk data
+
+### Wishlist
+
+* Backoffice
+    * Room assignments and scheduling in system
+    * panel entry in system
+    * panelist notes, also per panel for reporting afterwards
+
+### Open issues
+
+* Site copy is sometimes somewhat insulting
+* Per-panel input notes?
+* Why only three books/panel ideas/etc?
+* Why so limited availability input?
+* No search interface for tags
+    * Show how many a tag hits, allow piling on tags
+    * A view for "panels I've expressed interested in"
+* Production data has too few tags to effectively slice-n-dice
