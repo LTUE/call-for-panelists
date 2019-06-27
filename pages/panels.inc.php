@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['panels']) && is_arra
             array_push(
                 $saveValues, $panelist['id'], $id,
                 array_key_exists($data['role'], $roles) ? $data['role'] : NULL,
-                array_key_exists($data['experience'], $experiences) ? $data['experience'] : NULL,
+                array_key_exists($data['experience'], $experiences) ? $data['experience'] : NULL
             );
         }
     }
