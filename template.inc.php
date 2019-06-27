@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title><?= !empty($title) ? $title . ' - ' : '' ?>LTUE Panelists Website</title>
-    <link rel="stylesheet" href="site.css">
+    <link rel="stylesheet" href="/site.css">
 </head>
 <body>
 <?php if (!empty($_SESSION['account'])): ?>
