@@ -138,7 +138,7 @@ function valueIs($key, $check) {
     <label for="website">Website</label>
     <input type="url" id="website" name="website" value="<?= value('website') ?>">
 
-    <label class="long required" for="biography">We would like you biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come year you speak.</label>
+    <label class="long required" for="biography">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come year you speak.</label>
     <textarea id="biography" name="biography" required maxlength=500><?= value('biography') ?></textarea>
 
     <label class="long" for="intersectionalities">Please describe any <span title="age, race, gender, sexual preferences, etc">intersectionalities</span> you would like us to know about you.</label>
