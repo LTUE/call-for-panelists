@@ -129,7 +129,7 @@ function valueIs($key, $check) {
     <label class="required" for="name">What would we know you as?</label>
     <input type="text" id="name" name="name" required value="<?= value('name') ?>">
 
-    <label class="required" for="badge_name">Name as you would like it to appear on bade and table tent (Pen Name)</label>
+    <label class="required" for="badge_name">Name as you would like it to appear on badge and table tent (Pen Name)</label>
     <input type=text" id="badge_name" name="badge_name" required value="<?= value('badge_name') ?>">
 
     <label class="required" for="contact_email">Contact Email:</label>
