@@ -99,11 +99,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php
 function value($key) {
     global $panelist;
-    return $_POST[$key] ?? $panelist[$key] ?? '';
+    return htmlspecialchars($_POST[$key] ?? $panelist[$key] ?? '', ENT_QUOTES);
 }
 function topicValue($id) {
     global $myTopics;
     return !empty($_POST['topic'][$id]) || in_array($id, $myTopics);
+}
+function bookValue($id, $field) {
+    // TODO: my books
+    if (!empty($_POST['books']) && !empty($_POST['books'][$id]) && !empty($_POST['books'][$id][$field]))
+        return htmlspecialchars($_POST['books'][$id][$field], ENT_QUOTES);
+}
+function suggestionValue($id, $field) {
+    // TODO: my suggestions
+    if (!empty($_POST['suggestions']) && !empty($_POST['suggestions'][$id]) && !empty($_POST['suggestions'][$id][$field]))
+        return htmlspecialchars($_POST['suggestions'][$id][$field], ENT_QUOTES);
 }
 function valueIs($key, $check) {
     global $panelist;
@@ -153,9 +163,31 @@ function valueIs($key, $check) {
 
     <!-- TODO: preview or iframe, as in Mike's example -->
     <label class="long" for="picture">We would like to use your head shot in promotions and social media. Please upload your photo here. This should be a professional style photo that shows your face clearly and has a unobtrusive background.</label>
+    <?php if ($panelist['photo_file']): ?>
+    <figure>
+        <img src="/uploads/<?= $panelist['photo_file'] ?>" />
+        <figcaption>Our current photo of you.</figcaption>
+    </figure>
+    <?php endif; ?>
     <input type="file" name="picture" id="picture">
 
-    <!-- TODO: books - why only 3? -->
+    <p>If you would like one of LTUE's book partners to carry your books on consignment or through traditional sale (note: <span title="our sellers can only carry so many books">3 title limit</span>), please enter the information below.</p>
+    <table>
+        <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Author (on cover)</th>
+            <th>ISBN</th>
+        </tr>
+        <?php for ($i = 1; $i <= 3; $i++): ?>
+        <tr>
+            <th><?= $i ?>.</th>
+            <td><input type="text" name="books[<?= $i ?>][title]" value="<?= bookValue($i, 'title') ?>" /></td>
+            <td><input type="text" name="books[<?= $i ?>][author]" value="<?= bookValue($i, 'author') ?>" /></td>
+            <td><input type="text" name="books[<?= $i ?>][isbn]" value="<?= bookValue($i, 'isbn') ?>" /></td>
+        </tr>
+        <?php endfor; ?>
+    </table>
 
     <label class="required">Are you interested in participating in the LTUE Mass Signing on Friday February 14<sup>th</sup> from 6:30 pm to 8:00 pm?</label>
     <?php booleanForm('signing'); ?>
@@ -174,8 +206,52 @@ function valueIs($key, $check) {
     <?php booleanForm('share_email'); ?>
 
     <!-- TODO: presentation - 3 again -->
+    <p>Do you have a presentation or a workshop that you would like to run? If so, please give us a title, description, and a pitch for the programming. We will contact you with possible time slots in November, if your presentation is selected.</p>
+    <table>
+        <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Pitch</th>
+        </tr>
+        <?php for ($i = 1; $i <= 3; $i++): ?>
+        <tr>
+            <th><?= $i ?>.</th>
+            <td><input type="text" name="suggestions[<?= $i ?>][title]" value="<?= suggestionValue($i, 'title') ?>" /></td>
+            <td><input type="text" name="suggestions[<?= $i ?>][description]" value="<?= suggestionValue($i, 'description') ?>" /></td>
+            <td><input type="text" name="suggestions[<?= $i ?>][pitch]" value="<?= suggestionValue($i, 'pitch') ?>" /></td>
+        </tr>
+        <?php endfor; ?>
+    </table>
 
     <!-- TODO: available hours… -->
+    <p class="required">Which times will you be available and would like to see programming for?</p>
+    <table class="availability">
+        <tr>
+            <th></th>
+            <th>9 am - 11:45 am</th>
+            <th>noon - 3:45 pm</th>
+            <th>4:00 pm - end of day</th>
+        </tr>
+        <tr>
+            <th>Thursday Feb. 13, 2020</th>
+            <td><label><input type="checkbox" name="available[thu][morn]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[thu][day]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[thu][even]" value="TODO" /></label></td>
+        </tr>
+        <tr>
+            <th>Friday Feb. 14, 2020</th>
+            <td><label><input type="checkbox" name="available[fri][morn]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[fri][day]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[fri][even]" value="TODO" /></label></td>
+        </tr>
+        <tr>
+            <th>Saturday Feb. 15, 2020</th>
+            <td><label><input type="checkbox" name="available[sat][morn]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[sat][day]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[sat][even]" value="TODO" /></label></td>
+        </tr>
+    </table>
 
     <label class="long required">Which types of panels are you interested in? (mark all that apply) We will only show panels related to your selections and time frame in the next section</label>
     <?php foreach ($topics as $id => $name): ?>

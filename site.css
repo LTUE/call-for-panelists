@@ -75,3 +75,26 @@ section.panel label {
 section.panel select {
     float: right;
 }
+
+table.availability {
+    border-collapse: collapse;
+    width: 100%;
+}
+table.availability td {
+    border: 1px solid black;
+    text-align: center;
+}
+table.availability tr + tr th {
+    text-transform: uppercase;
+    text-align: left;
+}
+table.availability label {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    margin-top: 0;
+}
+table.availability input[type=checkbox] {
+    float: none;
+    display: inline;
+}

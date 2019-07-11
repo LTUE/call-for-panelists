@@ -52,7 +52,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
     <label for="email">Login Email:</label>
-    <input type="email" id="email" name="email" required value="<?= $_POST['email'] ?? '' ?>">
+    <input type="email" id="email" name="email" required value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES) ?>">
 
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
