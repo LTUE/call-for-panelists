@@ -1,42 +1,50 @@
 <?php defined('INCLUDED') or die(); ?>
 <?php $title = 'Register' ?>
 <?php
-if (!empty($_POST['email']) && !empty($_POST['password'])) {
-    if ($_POST['password'] === $_POST['password-confirm']) {
-        $query = $db->prepare('SELECT * FROM accounts WHERE email = :email');
-        $query->execute(array(':email' => $_POST['email']));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+function handleForm() {
+    global $db;
 
-        // email must be unique or warn the user
-        if (empty($row['email'])) {
-            $create = $db->prepare('INSERT INTO accounts SET email = :email, password = :password, type = :type');
-            $create->execute(array(
-                ':email' => $_POST['email'],
-                ':type' => 'panelist',
-                ':password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
-            ));
-            if ($create->rowCount() === 1) {
-                $query->execute(array(':email' => $_POST['email']));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
-                if (!empty($row['email'])) {
-                    unset($row['password']);
-                    session_regenerate_id(true); // further prevent fixation attacks
-                    $_SESSION['account'] = $row;
-                    header('Location: /');
-                    exit;
-                } else {
-                    $error = 'Account created - please log in to continue';
-                }
-            } else {
-                $error = 'We failed to create your account. I don\'t know why. Try again?';
-            }
-        } else {
-            // TODO: password reset
-            $error = 'It appears that email may have already registered. Try logging in again, or contact support?';
-        }
-    } else {
-        $error = 'Passwords do not match';
+    if ($_POST['password'] !== $_POST['password-confirm'])
+        return 'Passwords do not match';
+    if (strlen($_POST['password']) < 12)
+        return 'Password must be at least 12 characters';
+    if (strlen($_POST['password']) > 128)
+        return 'Password is too long to be useful - you only need 256 bits at <em>most</em>.';
+
+    $query = $db->prepare('SELECT * FROM accounts WHERE email = :email');
+    $query->execute(array(':email' => $_POST['email']));
+    $row = $query->fetch(PDO::FETCH_ASSOC);
+
+    // email must be unique or warn the user
+    if (!empty($row['email'])) {
+        // TODO: password reset
+        return 'It appears that email may have already registered. Try logging in again, or contact support?';
     }
+
+    $create = $db->prepare('INSERT INTO accounts SET email = :email, password = :password, type = :type');
+    $create->execute(array(
+        ':email' => $_POST['email'],
+        ':type' => 'panelist',
+        ':password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
+    ));
+    if ($create->rowCount() !== 1) {
+        return 'We failed to create your account. I don\'t know why. Try again?';
+    }
+
+    $query->execute(array(':email' => $_POST['email']));
+    $row = $query->fetch(PDO::FETCH_ASSOC);
+    if (empty($row['email'])) {
+        return 'Account created - please log in to continue';
+    }
+
+    unset($row['password']);
+    session_regenerate_id(true); // further prevent fixation attacks
+    $_SESSION['account'] = $row;
+    header('Location: /');
+    exit;
+}
+if (!empty($_POST['email']) && !empty($_POST['password'])) {
+    $error = handleForm();
 }
 ?>
 <form method="POST">
