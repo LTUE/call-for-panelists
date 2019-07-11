@@ -16,77 +16,84 @@ if (!empty($panelist)) {
     $myTopics = $myTopicsQuery->fetchAll(PDO::FETCH_COLUMN);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+function handleForm() {
+    global $db, $panelist, $topics;
+
+    if (!empty($_POST['biography']) && strlen($_POST['biography']) > 500)
+        return 'Your biography is too long. Please reduce it.';
+    if (!empty($_POST['topic']) && !is_array($_POST['topic']))
+        return 'Your data is somehow corrupted - please contact us and show us what you did so we can fix it.';
+
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
         !empty($_POST['contact_email']) && !empty($_POST['biography']) && !empty($_POST['topic']) &&
         !empty($_POST['signing']) && !empty($_POST['moderator']) &&
         !empty($_POST['recording']) && !empty($_POST['share_email']);
-    if (!empty($_POST['biography']) && strlen($_POST['biography']) > 500) {
-        $error = 'Your biography is too long. Please reduce it.';
-    } else if (!empty($_POST['topic']) && !is_array($_POST['topic'])) {
-        $error = 'Your data is somehow corrupted - please contact us and show us what you did so we can fix it.';
-    } else if ($sufficientData) {
-        $profileSet = '
-            name = :name, badge_name = :badge_name, contact_email = :contact_email, website = :website,
-            biography = :biography, intersectionalities = :intersectionalities,
-            signing = :signing, reading = :reading, moderator = :moderator,
-            recording = :recording, share_email = :share_email
-        ';
-        if (empty($panelist))
-            $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, ' . $profileSet;
-        else
-            $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE account_id = :account_id';
-        $saveProfile = $db->prepare($saveQuery);
-        $saveProfile->execute(array(
-            ':account_id' => $_SESSION['account']['id'],
-            ':name' => $_POST['name'],
-            ':badge_name' => $_POST['badge_name'],
-            ':contact_email' => $_POST['contact_email'],
-            ':website' => $_POST['website'] ?? '',
-            ':biography' => $_POST['biography'],
-            ':intersectionalities' => $_POST['intersectionalities'] ?? '',
-
-            ':signing' => $_POST['signing'] === 'yes',
-            ':reading' => !empty($_POST['reading']) && $_POST['reading'] === 'yes',
-            ':moderator' => $_POST['moderator'] === 'yes',
-            ':recording' => $_POST['recording'] === 'yes',
-            ':share_email' => $_POST['share_email'] === 'yes',
-        ));
-        // no affected rows if no changes, so only INSERT
-        if (!empty($panelist) || $saveProfile->rowCount() === 1) {
-            if (empty($panelist)) {
-                $getPanelist->execute(array(':id' => $_SESSION['account']['id']));
-                $panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
-            }
-
-            // TODO: make it work right… Don't wipe and reset, remove the removed ones
-            $removeOldTopics = $db->prepare('DELETE FROM panelists_topics WHERE panelist_id = :id');
-            $removeOldTopics->execute(array(':id' => $panelist['id']));
-
-            $addedTopics = array();
-            foreach (array_keys($_POST['topic']) as $id) {
-                array_push($addedTopics, $panelist['id'], $id);
-            }
-            $addTopicsQuery = 'INSERT INTO panelists_topics (panelist_id, topic_id) VALUES';
-            $addTopicsQuery .= implode(', ', array_fill(0, count($addedTopics) / 2, '(?, ?)'));
-            $addTopics = $db->prepare($addTopicsQuery);
-            $addTopics->execute($addedTopics);
-            if ($addTopics->rowCount() === (count($addedTopics) / 2)) {
-                header('Location: /panels');
-                exit;
-            } else {
-                $error = 'We failed to save your topics. I don\'t know why. Try again?';
-            }
-        } else {
-            $error = 'We failed to save your profile. I don\'t know why. Try again?';
-        }
-    } else {
+    if (!$sufficientData) {
         // client-side validation should catch most missing fields, so simple check and fail
         if (empty($_POST['topic']))
-            $error = 'You must select at least one interesting type of panel';
+            return 'You must select at least one interesting type of panel';
         else
-            $error = 'Please complete all required sections of the form, marked with a *';
+            return 'Please complete all required sections of the form, marked with a *';
     }
+
+    $profileSet = '
+        name = :name, badge_name = :badge_name, contact_email = :contact_email, website = :website,
+        biography = :biography, intersectionalities = :intersectionalities,
+        signing = :signing, reading = :reading, moderator = :moderator,
+        recording = :recording, share_email = :share_email
+    ';
+    if (empty($panelist))
+        $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, ' . $profileSet;
+    else
+        $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE account_id = :account_id';
+    $saveProfile = $db->prepare($saveQuery);
+    $saveProfile->execute(array(
+        ':account_id' => $_SESSION['account']['id'],
+        ':name' => $_POST['name'],
+        ':badge_name' => $_POST['badge_name'],
+        ':contact_email' => $_POST['contact_email'],
+        ':website' => $_POST['website'] ?? '',
+        ':biography' => $_POST['biography'],
+        ':intersectionalities' => $_POST['intersectionalities'] ?? '',
+
+        ':signing' => $_POST['signing'] === 'yes',
+        ':reading' => !empty($_POST['reading']) && $_POST['reading'] === 'yes',
+        ':moderator' => $_POST['moderator'] === 'yes',
+        ':recording' => $_POST['recording'] === 'yes',
+        ':share_email' => $_POST['share_email'] === 'yes',
+    ));
+
+    // no affected rows if no changes, so only INSERT
+    if (empty($panelist) && $saveProfile->rowCount() !== 1)
+        return 'We failed to save your profile. I don\'t know why. Try again?';
+
+    if (empty($panelist)) {
+        $getPanelist->execute(array(':id' => $_SESSION['account']['id']));
+        $panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // TODO: make it work right… Don't wipe and reset, remove the removed ones
+    $removeOldTopics = $db->prepare('DELETE FROM panelists_topics WHERE panelist_id = :id');
+    $removeOldTopics->execute(array(':id' => $panelist['id']));
+
+    $addedTopics = array();
+    foreach (array_keys($_POST['topic']) as $id) {
+        array_push($addedTopics, $panelist['id'], $id);
+    }
+    $addTopicsQuery = 'INSERT INTO panelists_topics (panelist_id, topic_id) VALUES';
+    $addTopicsQuery .= implode(', ', array_fill(0, count($addedTopics) / 2, '(?, ?)'));
+    $addTopics = $db->prepare($addTopicsQuery);
+    $addTopics->execute($addedTopics);
+
+    if ($addTopics->rowCount() !== (count($addedTopics) / 2))
+        return 'We failed to save your topics. I don\'t know why. Try again?';
+
+    header('Location: /panels');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $error = handleForm();
 }
 ?>
 <?php

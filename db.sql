@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS panelists (
     account_id INT UNSIGNED UNIQUE REFERENCES accounts(id),
     name VARCHAR(191) NOT NULL,
     badge_name VARCHAR(191) NOT NULL,
-    contact_email VARCHAR(191) UNIQUE NOT NULL,
+    contact_email VARCHAR(191) NOT NULL,
     website VARCHAR(191),
     biography TEXT,
     intersectionalities TEXT,
