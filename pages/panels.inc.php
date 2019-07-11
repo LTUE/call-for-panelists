@@ -81,9 +81,10 @@ function dayOfWeek($day) {
     }
 }
 function prettyTime($hour) {
+    // TODO: doesn't handle midnight ("0:00 am") but no panels then anyway
     return $hour . ':00 (' .
         ($hour > 12 ? $hour - 12 : $hour) . ':00 ' .
-        (($hour >= 12 && $hour < 24) ? 'am' : 'pm') .
+        (($hour <= 12 && $hour != 0) ? 'am' : 'pm') .
         ')';
 }
 ?>
