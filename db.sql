@@ -14,7 +14,9 @@ CREATE TABLE IF NOT EXISTS accounts (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(191) UNIQUE NOT NULL,
     password TINYTEXT CHARACTER SET latin1 NOT NULL,
-    type VARCHAR(20) NOT NULL REFERENCES account_types(type)
+    type VARCHAR(20) NOT NULL,
+
+    CONSTRAINT FOREIGN KEY (type) REFERENCES account_types(type)
 );
 
 /* Has own surrogate key to link tables; to ensure other account types aren't linked */
@@ -33,9 +35,11 @@ CREATE TABLE IF NOT EXISTS panelists (
     reading BOOLEAN NOT NULL,
     moderator BOOLEAN NOT NULL,
     recording BOOLEAN NOT NULL,
-    share_email BOOLEAN NOT NULL
+    share_email BOOLEAN NOT NULL,
     /* TODO: presentations/workshops */
     /* TODO: times available; what exactly are they? */
+
+    CONSTRAINT FOREIGN KEY (account_id) REFERENCES accounts(id)
 );
 
 CREATE TABLE IF NOT EXISTS topics (
@@ -68,25 +72,86 @@ INSERT IGNORE INTO topics (name) VALUES
 
 /* Many-to-many join table */
 CREATE TABLE IF NOT EXISTS panelists_topics (
-    panelist_id INT UNSIGNED NOT NULL REFERENCES panelists(id),
-    topic_id INT UNSIGNED NOT NULL REFERENCES topics(id),
+    panelist_id INT UNSIGNED NOT NULL,
+    topic_id INT UNSIGNED NOT NULL,
+
+    CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE,
+
     PRIMARY KEY (panelist_id, topic_id)
 );
+
+CREATE TABLE IF NOT EXISTS tracks (
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(191) UNIQUE NOT NULL
+    /* TODO: track heads?, etc */
+);
+INSERT IGNORE INTO tracks (name) VALUES
+('Art'),
+('Books'),
+('CYOW'),
+('Gaming'),
+('ProDev'),
+('TMA'),
+('Writing');
+
+CREATE TABLE IF NOT EXISTS panel_types (
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(191) UNIQUE NOT NULL
+);
+INSERT IGNORE INTO panel_types (name) VALUES
+('Panel'),
+('Presentation'),
+('Workshop');
+
+/* TODO: something for distance calculation, AV probably not tied to room(?) */
+/* Pick registration as "0", distances are roughly linear, in travel minutes? */
+CREATE TABLE IF NOT EXISTS rooms (
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(191) UNIQUE NOT NULL,
+    capacity SMALLINT UNSIGNED NOT NULL,
+    hasAV2020 BOOLEAN NOT NULL DEFAULT FALSE
+);
+INSERT IGNORE INTO rooms (name, capacity, hasAV2020) VALUES
+('Amphitheater', 117, true),
+('Arches', 200, false),
+('Boardroom', 18, false),
+('Bryce', 200, false),
+('Canyon', 230, true),
+('Cedar', 158, false),
+('Elm', 100, false),
+('Exhibit Hall C', 828, true),
+('Juniper', 121, false),
+('Maple', 80, true),
+('Oak', 53, true),
+('Sycamore', 53, false),
+('Zion', 400, true);
 
 /* TODO: add track, then allow showing by track for committee members */
 CREATE TABLE IF NOT EXISTS panels (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     /* TODO: has a room slot - which itself should have the time+day instead. Doing this for speed today */
-    day TINYINT NOT NULL, /* 1 = Thursday -> 3 = Saturday, for now */
-    hour TINYINT NOT NULL, /* 24 hours - no meridian */
+    day DATE NOT NULL,
+    time TIME NOT NULL,
+    minutes SMALLINT UNSIGNED NOT NULL DEFAULT 45,
     title VARCHAR(191) UNIQUE NOT NULL, /* TODO: unique key across this + year */
     description TEXT NOT NULL,
-    seed_questions TEXT NOT NULL
+    seed_questions TEXT,
+    track_id INT UNSIGNED NOT NULL,
+    type_id INT UNSIGNED NOT NULL,
+    room_id INT UNSIGNED NOT NULL,
+
+    CONSTRAINT FOREIGN KEY (track_id) REFERENCES tracks(id),
+    CONSTRAINT FOREIGN KEY (type_id) REFERENCES panel_types(id),
+    CONSTRAINT FOREIGN KEY (room_id) REFERENCES rooms(id)
 );
 
 CREATE TABLE IF NOT EXISTS panels_topics (
-    panel_id INT UNSIGNED NOT NULL REFERENCES panels(id),
-    topic_id INT UNSIGNED NOT NULL REFERENCES topics(id),
+    panel_id INT UNSIGNED NOT NULL,
+    topic_id INT UNSIGNED NOT NULL,
+
+    CONSTRAINT FOREIGN KEY (panel_id) REFERENCES panels(id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE,
     PRIMARY KEY (panel_id, topic_id)
 );
 
@@ -104,10 +169,15 @@ INSERT IGNORE INTO panel_experience (name) VALUES ('1-5'), ('6-10'), ('10-20'), 
 
 /* TODO - assigned flag, description for later performance; unless we want to split assigned from interest; maybe */
 CREATE TABLE IF NOT EXISTS panelists_panels (
-    panelist_id INT UNSIGNED NOT NULL REFERENCES panelists(id),
-    panel_id INT UNSIGNED NOT NULL REFERENCES panels(id),
-    panel_roles_id INT UNSIGNED REFERENCES panel_roles(id),
-    panel_experience_id INT UNSIGNED REFERENCES panel_experience(id),
+    panelist_id INT UNSIGNED NOT NULL,
+    panel_id INT UNSIGNED NOT NULL,
+    panel_roles_id INT UNSIGNED,
+    panel_experience_id INT UNSIGNED,
+
+    CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (panel_id) REFERENCES panels(id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (panel_roles_id) REFERENCES panel_roles(id),
+    CONSTRAINT FOREIGN KEY (panel_experience_id) REFERENCES panel_experience(id),
     PRIMARY KEY (panelist_id, panel_id)
 );
 

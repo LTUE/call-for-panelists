@@ -76,6 +76,7 @@ function handleForm() {
     $removeOldTopics = $db->prepare('DELETE FROM panelists_topics WHERE panelist_id = :id');
     $removeOldTopics->execute(array(':id' => $panelist['id']));
 
+    // TODO: check the id exists? No major risk, probably…
     $addedTopics = array();
     foreach (array_keys($_POST['topic']) as $id) {
         array_push($addedTopics, $panelist['id'], $id);

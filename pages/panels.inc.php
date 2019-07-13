@@ -71,16 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['panels']) && is_arra
 }
 ?>
 <?php
-// TODO: replace with a real date system
-function dayOfWeek($day) {
-    switch ($day) {
-    case 1: return 'Thursday';
-    case 2: return 'Friday';
-    case 3: return 'Saturday';
-    default: return 'Bug';
-    }
-}
-function prettyTime($hour) {
+function prettyTime($time) {
+    $hour = explode(':', $time)[0];
     // TODO: doesn't handle midnight ("0:00 am") but no panels then anyway
     return $hour . ':00 (' .
         ($hour > 12 ? $hour - 12 : $hour) . ':00 ' .
@@ -110,7 +102,7 @@ function prettyTime($hour) {
 <?php endif; ?>
 <?php foreach ($panels as $panel): ?>
     <section class="panel">
-        <h2><?= dayOfWeek($panel['day']) ?> - <?= prettyTime($panel['hour']) ?> - <?= htmlspecialchars($panel['title'], ENT_QUOTES) ?></h2>
+        <h2><?= date('l', strtotime($panel['day'])) ?> - <?= prettyTime($panel['time']) ?> - <?= htmlspecialchars($panel['title'], ENT_QUOTES) ?></h2>
         <dl><dt>Tags</dt><dd><?= implode(', ', array_map(function($id) {
             global $topics;
             return htmlspecialchars($topics[$id], ENT_QUOTES);
