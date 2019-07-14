@@ -1,5 +1,5 @@
 <?php defined('INCLUDED') or die(); ?>
-<?php $title = 'Register' ?>
+<?php $template = 'small-form' ?>
 <?php
 function handleForm() {
     global $db;
@@ -36,7 +36,6 @@ function handleForm() {
     if (empty($row['email'])) {
         return 'Account created - please log in to continue';
     }
-
     unset($row['password']);
     session_regenerate_id(true); // further prevent fixation attacks
     $_SESSION['account'] = $row;
@@ -51,16 +50,16 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
-    <label for="email">Login Email:</label>
+    <label for="email">Login Email</label>
     <input type="email" id="email" name="email" required value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES) ?>">
 
-    <label for="password">Password:</label>
+    <label for="password">Password</label>
     <input type="password" id="password" name="password" required>
 
-    <label for="password-confirm">Confirm Password:</label>
+    <label for="password-confirm">Confirm Password</label>
     <input type="password" id="password-confirm" name="password-confirm" required>
 
     <input type="submit" value="Register">
-</form>
 
-<p>Already have an account? <a href="/login">Login</a> instead.</p>
+    <p>Already signed up? <a href="/login">Login</a></p>
+</form>

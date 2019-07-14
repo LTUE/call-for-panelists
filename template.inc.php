@@ -4,20 +4,25 @@
     <meta charset="utf-8">
     <title><?= !empty($title) ? $title . ' - ' : '' ?>LTUE Panelists Website</title>
     <link rel="stylesheet" href="/site.css">
+    <link rel="stylesheet" href="/large-form.css">
 </head>
-<body>
+<body class="large-form">
 <?php if (!empty($_SESSION['account'])): ?>
-<nav><ul>
-    <li><a href="/profile">Profile</a></li>
-    <li><a href="/panels">Panels</a></li>
-    <li><a href="/logout">Logout?</a></li>
-</ul></nav>
-<p>Logged in as <?= htmlspecialchars($_SESSION['account']['email'], ENT_QUOTES) ?>.</p>
+<nav>
+    <img src="img/LTUELogo-WithText.png" />
+    <ul>
+        <li><a href="/profile">Profile Form</a></li>
+        <li><a href="/panels">Panel Selection</a></li>
+        <li><a href="/logout">Log out</a></li>
+    </ul>
+</nav>
 <?php endif; ?>
 <?php if (!empty($title)): ?>
     <h1><?= $title ?></h1>
 <?php endif; ?>
-    <?= $content ?>
+    <main>
+        <?= $content ?>
 
+    </main>
 </body>
 </html>

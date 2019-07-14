@@ -1,5 +1,5 @@
 <?php defined('INCLUDED') or die(); ?>
-<?php $title = 'Profile' ?>
+<?php $title = 'Profile Form' ?>
 <?php
 $getPanelist = $db->prepare('SELECT * FROM panelists WHERE account_id = :id');
 $getPanelist->execute(array(':id' => $_SESSION['account']['id']));
@@ -42,12 +42,7 @@ function handleForm() {
         signing = :signing, reading = :reading, moderator = :moderator,
         recording = :recording, share_email = :share_email
     ';
-    if (empty($panelist))
-        $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, ' . $profileSet;
-    else
-        $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE account_id = :account_id';
-    $saveProfile = $db->prepare($saveQuery);
-    $saveProfile->execute(array(
+    $data = [
         ':account_id' => $_SESSION['account']['id'],
         ':name' => $_POST['name'],
         ':badge_name' => $_POST['badge_name'],
@@ -61,7 +56,14 @@ function handleForm() {
         ':moderator' => $_POST['moderator'] === 'yes',
         ':recording' => $_POST['recording'] === 'yes',
         ':share_email' => $_POST['share_email'] === 'yes',
-    ));
+    ];
+
+    if (empty($panelist))
+        $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, ' . $profileSet;
+    else
+        $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE account_id = :account_id';
+    $saveProfile = $db->prepare($saveQuery);
+    $saveProfile->execute($data);
 
     // no affected rows if no changes, so only INSERT
     if (empty($panelist) && $saveProfile->rowCount() !== 1)
@@ -139,38 +141,45 @@ function valueIs($key, $check) {
 <?php $year = 2020; /* TODO: auto-calculate */ ?>
 <p>Welcome to the <?= $year; ?> LTUE Call for Panelists! Please sign up for panels for which you are interested and qualified. Please note that expressing interest will not automatically put you on a panel. As we create our schedule, we will notify you if/when you have been selected for a panel.</p>
 <p><strong>This Call for Panelists will close on September 1<sup>st</sup>.</strong> We will begin contacting those who have been selected for panels in November.</p>
-<p><strong>LTUE is Thurday Feb. 13<sup>th</sup> to Saturday Feb. 15<sup>th</sup>, 2020.</strong></p>
-<form method="POST">
+<p>LTUE is Thurday Feb. 13<sup>th</sup> to Saturday Feb. 15<sup>th</sup>, 2020.</p>
+<p><strong>You must click Update Profile</strong> in order to save this form.</p>
+<form method="POST" enctype="multipart/form-data">
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
     <label class="required" for="name">What would we know you as?</label>
     <input type="text" id="name" name="name" required value="<?= value('name') ?>">
 
-    <label class="required" for="badge_name">Name as you would like it to appear on badge and table tent (Pen Name)</label>
+    <label class="required" for="badge_name">Badge Name</label>
     <input type=text" id="badge_name" name="badge_name" required value="<?= value('badge_name') ?>">
+    <p class="explanation">Name as you would like it to appear on badge and table tent (Pen Name)</p>
 
     <label class="required" for="contact_email">Contact Email:</label>
     <input type="email" id="contact_email" name="contact_email" required value="<?= value('contact_email') ?: $_SESSION['account']['email'] ?>">
+    <p class="explanation">You will be notified if you are accepted as a panelist/presenter through this email.</p>
 
     <label for="website">Website</label>
     <input type="url" id="website" name="website" value="<?= value('website') ?>">
 
-    <label class="long required" for="biography">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come year you speak.</label>
+    <label class="required" for="biography">Short bio</label>
     <textarea id="biography" name="biography" required maxlength=500><?= value('biography') ?></textarea>
+    <p class="explanation">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come hear you speak.</p>
 
-    <label class="long" for="intersectionalities">Please describe any <span title="age, race, gender, sexual preferences, etc">intersectionalities</span> you would like us to know about you.</label>
+    <label class="long" for="intersectionalities">Additional info</label>
     <textarea id="intersectionalities" name="intersectionalities"><?= value('intersectionalities') ?></textarea>
+    <p class="explanation">Please describe any <span title="age, race, gender, sexual preferences, etc">intersectionalities</span> you would like us to know about you.</p>
 
     <!-- TODO: preview or iframe, as in Mike's example -->
-    <label class="long" for="picture">We would like to use your head shot in promotions and social media. Please upload your photo here. This should be a professional style photo that shows your face clearly and has a unobtrusive background.</label>
+    <input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
+    <label for="picture">Profile Photo</label>
     <?php if ($panelist['photo_file']): ?>
-    <figure>
+    <figure id="current-picture">
         <img src="/uploads/<?= $panelist['photo_file'] ?>" />
         <figcaption>Our current photo of you.</figcaption>
     </figure>
     <?php endif; ?>
     <input type="file" name="picture" id="picture">
+    <p class="explanation">We would like to use your head shot in promotions and social media. Please upload your photo here. This should be a professional style photo that shows your face clearly and has a unobtrusive background.</p>
 
     <p>If you would like one of LTUE's book partners to carry your books on consignment or through traditional sale (note: <span title="our sellers can only carry so many books">3 title limit</span>), please enter the information below.</p>
     <table>

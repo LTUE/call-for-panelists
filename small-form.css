@@ -1,0 +1,63 @@
+html {
+    background-position: center;
+}
+
+body.small-form::after {
+    content: '.';
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+body.small-form {
+    margin-top: 25%;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+}
+
+body.small-form label {
+    letter-spacing: 0.44px;
+}
+
+body.small-form hr {
+    width: 2px;
+    background-color: #979797;
+    border: 0;
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    top: 32px;
+    bottom: 32px;
+}
+
+body.small-form header {
+    width: 221px;
+    text-align: center;
+    padding: 30px;
+    float: left;
+}
+body.small-form header img {
+    margin: 0 auto;
+}
+body.small-form header h1 {
+    margin: 38px 6px 12px;
+}
+
+body.small-form form {
+    float: right;
+    width: 272px;
+    margin-top: 8px;
+}
+body.small-form input[type=submit] {
+    float: right;
+}
+
+body.small-form p {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    clear: right;
+}
+body.small-form a {
+    color: #1593c0;
+}

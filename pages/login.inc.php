@@ -1,5 +1,5 @@
 <?php defined('INCLUDED') or die(); ?>
-<?php $title = 'Login' ?>
+<?php $template = 'small-form' ?>
 <?php
 if (!empty($_POST['email']) && !empty($_POST['password'])) {
     $query = $db->prepare('SELECT * FROM accounts WHERE email = :email');
@@ -22,13 +22,12 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
-    <label for="email">Email:</label>
+    <label for="email">Login Email</label>
     <input type="email" id="email" name="email">
 
-    <label for="password">Password:</label>
+    <label for="password">Password</label>
     <input type="password" id="password" name="password">
 
-    <input type="submit" value="Login">
+    <input type="submit" value="Log in">
+    <p>Haven't made an account? <a href="/register">Register</a></p>
 </form>
-
-<p>Would you like to sign up? <a href="/register">Register as a panelist</a>.</p>

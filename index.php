@@ -43,4 +43,4 @@ ob_start();
 require('pages/'. $page . '.inc.php');
 $content = ob_get_clean();
 
-require('template.inc.php');
+require(($template ?? 'template') . '.inc.php');

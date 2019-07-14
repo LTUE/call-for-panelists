@@ -72,8 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['panels']) && is_arra
 ?>
 <?php
 function prettyTime($time) {
-    $hour = explode(':', $time)[0];
-    // TODO: doesn't handle midnight ("0:00 am") but no panels then anyway
+    $hour = ltrim(explode(':', $time)[0], '0');
     return $hour . ':00 (' .
         ($hour > 12 ? $hour - 12 : $hour) . ':00 ' .
         (($hour <= 12 && $hour != 0) ? 'am' : 'pm') .
@@ -96,18 +95,24 @@ function prettyTime($time) {
 <!-- TODO: language is extremely rude here! -->
 <p><strong>If you are interested in a panel</strong>, please tell us your experience and the number of years of experience in that role. If you do not fill out both questions for a panel, then we will assume that you are not interested.</p>
 <p>Expressing interest in a panel is not a guarantee of being chosen.</p>
+<p><strong>You must click Update Panel Selection</strong> at the bottom of the page in order to save this form.</p>
 <form method="POST">
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
 <?php foreach ($panels as $panel): ?>
     <section class="panel">
-        <h2><?= date('l', strtotime($panel['day'])) ?> - <?= prettyTime($panel['time']) ?> - <?= htmlspecialchars($panel['title'], ENT_QUOTES) ?></h2>
-        <dl><dt>Tags</dt><dd><?= implode(', ', array_map(function($id) {
-            global $topics;
-            return htmlspecialchars($topics[$id], ENT_QUOTES);
-        }, explode(',', $panel['topic_ids']))) ?></dd></dt></dl>
+        <h2><?= htmlspecialchars($panel['title'], ENT_QUOTES) ?></h2>
+        <h3><?= prettyTime($panel['time']) ?> - <?= date('l, M j', strtotime($panel['day'])) ?></h3>
+        <ul class="tags">
+        <?php foreach(explode(',', $panel['topic_ids']) as $id): ?>
+            <li><?= htmlspecialchars($topics[$id], ENT_QUOTES); ?></li>
+        <?php endforeach; ?>
+        </ul>
         <p><?= htmlspecialchars($panel['description'], ENT_QUOTES) ?></p>
+
+        <input type="checkbox" id="panel-<?= $panel['id'] ?>-interested" name="panel[<?= $panel['id'] ?>][interested]"<?= $panel['panel_roles_id'] || $panel['panel_experience_id'] ? ' checked' : '' ?>>
+        <label for="panel-<?= $panel['id'] ?>-interested">I am interested in this panel</label>
 
         <label for="panel[<?= $panel['id'] ?>][role]">What is your main role with this subject?</label>
         <select id="panel-<?= $panel['id'] ?>-role" name="panels[<?= $panel['id'] ?>][role]">
