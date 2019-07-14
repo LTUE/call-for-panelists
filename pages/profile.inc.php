@@ -74,6 +74,44 @@ function handleForm() {
         $panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
     }
 
+    if (empty($_FILES['picture']))
+        return 'Error - picture missing';
+    // TODO: needs a way to clear the picture as well, not just replace
+    if ($_FILES['picture']['tmp_name']) {
+        $ext = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
+        switch ($ext) {
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'gif':
+            break;
+        default:
+            return 'File extension unknown - please upload a .jpeg, .jpg, .gif, or .png';
+        }
+
+        if ($_FILES['picture']['size'] > 1000000)
+            return 'Photo file too large';
+
+        $uploadDir = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'uploads';
+
+        // remove prior file
+        if ($panelist['photo_file']) {
+            if (!unlink($uploadDir . DIRECTORY_SEPARATOR . $panelist['photo_file']))
+                return 'Failed to clear prior photo - please contact support';
+        }
+
+        $photoFile = 'picture_' . $panelist['id'] . '.' . $ext;
+        if (!move_uploaded_file($_FILES['picture']['tmp_name'], $uploadDir . DIRECTORY_SEPARATOR . $photoFile))
+            return 'Failed to store your photo - please contact support';
+
+        $savePhoto = $db->prepare('UPDATE panelists SET photo_file = ? WHERE account_id = ?');
+        $savePhoto->execute([$photoFile, $panelist['id']]);
+        if ($savePhoto->rowCount() !== 1)
+            return 'Failed to save your photo - please contact support';
+
+        $panelist['photo_file'] = $photoFile;
+    }
+
     // TODO: make it work right… Don't wipe and reset, remove the removed ones
     $removeOldTopics = $db->prepare('DELETE FROM panelists_topics WHERE panelist_id = :id');
     $removeOldTopics->execute(array(':id' => $panelist['id']));
