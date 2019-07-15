@@ -70,6 +70,7 @@ function handleForm() {
         return 'We failed to save your profile. I don\'t know why. Try again?';
 
     if (empty($panelist)) {
+        global $getPanelist;
         $getPanelist->execute(array(':id' => $_SESSION['account']['id']));
         $panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
     }
