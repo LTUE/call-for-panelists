@@ -43,9 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['panels']) && is_arra
         if (empty($panels[$id]))
             continue; // panel was removed or something fishy
 
+        if (empty($data['interested'])) {
+            $data['role'] = '';
+            $data['experience'] = '';
+        }
+
         // we use weak compare to match '' and NULL
         $needToSave = $data['role'] != $panels[$id]['panel_roles_id'] ||
             $data['experience'] != $panels[$id]['panel_experience_id'];
+        // TODO: delete if NULL and NULL - equivalent. Later
         if ($needToSave) {
             array_push(
                 $saveValues, $panelist['id'], $id,
@@ -111,7 +117,7 @@ function prettyTime($time) {
         </ul>
         <p><?= htmlspecialchars($panel['description'], ENT_QUOTES) ?></p>
 
-        <input type="checkbox" id="panel-<?= $panel['id'] ?>-interested" name="panel[<?= $panel['id'] ?>][interested]"<?= $panel['panel_roles_id'] || $panel['panel_experience_id'] ? ' checked' : '' ?>>
+        <input type="checkbox" id="panel-<?= $panel['id'] ?>-interested" name="panels[<?= $panel['id'] ?>][interested]"<?= $panel['panel_roles_id'] || $panel['panel_experience_id'] ? ' checked' : '' ?>>
         <label for="panel-<?= $panel['id'] ?>-interested">I am interested in this panel</label>
 
         <label for="panel[<?= $panel['id'] ?>][role]">What is your main role with this subject?</label>
