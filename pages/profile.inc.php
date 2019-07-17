@@ -186,7 +186,7 @@ function valueIs($key, $check) {
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
-    <label class="required" for="name">What would we know you as?</label>
+    <label class="required" for="name">What is your name?</label>
     <input type="text" id="name" name="name" required value="<?= value('name') ?>">
 
     <label class="required" for="badge_name">Badge Name</label>
