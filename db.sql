@@ -181,4 +181,25 @@ CREATE TABLE IF NOT EXISTS panelists_panels (
     PRIMARY KEY (panelist_id, panel_id)
 );
 
+CREATE TABLE IF NOT EXISTS books_to_stock (
+    panelist_id INT UNSIGNED NOT NULL,
+    position TINYINT UNSIGNED NOT NULL,
+    title TINYTEXT,
+    author TINYTEXT,
+    isbn TINYTEXT,
+
+    CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
+    PRIMARY KEY (panelist_id, position)
+);
+CREATE TABLE IF NOT EXISTS panelist_suggestions (
+    panelist_id INT UNSIGNED NOT NULL,
+    position TINYINT UNSIGNED NOT NULL,
+    title TINYTEXT,
+    description TEXT,
+    pitch TEXT,
+
+    CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
+    PRIMARY KEY (panelist_id, position)
+);
+
 SET sql_notes = 1;

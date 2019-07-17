@@ -16,6 +16,26 @@ if (!empty($panelist)) {
     $myTopics = $myTopicsQuery->fetchAll(PDO::FETCH_COLUMN);
 }
 
+$myBooks = [];
+$mySuggestions = [];
+if ($panelist) {
+    $getMyBooks = $db->prepare(
+        'SELECT position, title, author, isbn FROM books_to_stock WHERE panelist_id = :id'
+    );
+    $getMyBooks->execute(array(':id' => $panelist['id']));
+    foreach ($getMyBooks->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $myBooks[$row['position']] = $row;
+    }
+
+    $getMySuggestions = $db->prepare(
+        'SELECT position, title, description, pitch FROM panelist_suggestions WHERE panelist_id = :id'
+    );
+    $getMySuggestions->execute(array(':id' => $panelist['id']));
+    foreach ($getMySuggestions->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $mySuggestions[$row['position']] = $row;
+    }
+}
+
 function handleForm() {
     global $db, $panelist, $topics;
 
@@ -130,8 +150,64 @@ function handleForm() {
     if ($addTopics->rowCount() !== (count($addedTopics) / 2))
         return 'We failed to save your topics. I don\'t know why. Try again?';
 
+
+    // TODO: slightly less lazy both books and suggestions
+    // TODO: field limits!
+
+    $removeBooks = $db->prepare('DELETE FROM books_to_stock WHERE panelist_id = :id');
+    $removeBooks->execute(array(':id' => $panelist['id']));
+    $books = [];
+    for ($i = 1; $i <= 3; $i++) {
+        if (empty($_POST['books'][$i]))
+            continue;
+        $data = $_POST['books'][$i];
+        if (empty($data['title']) && empty($data['author']) && empty($data['isbn']))
+            continue;
+        array_push(
+            $books, $panelist['id'], $i,
+            $data['title'] ?? '', $data['author'] ?? '', $data['isbn'] ?? ''
+        );
+    }
+    if (count($books)) {
+        $addBooks = $db->prepare(
+            'INSERT INTO books_to_stock (panelist_id, position, title, author, isbn) VALUES ' .
+            implode(', ', array_fill(0, count($books) / 5, '(?, ?, ?, ?, ?)'))
+        );
+        $addBooks->execute($books);
+        if ($addBooks->rowCount() !== (count($books) / 5)) {
+            return 'Failed to save book suggestions - please try again or contact support';
+        }
+    }
+
+    $removeSuggestions = $db->prepare('DELETE FROM panelist_suggestions WHERE panelist_id = :id');
+    $removeSuggestions->execute(array(':id' => $panelist['id']));
+    $suggestions = [];
+    for ($i = 1; $i <= 3; $i++) {
+        if (empty($_POST['suggestions'][$i]))
+            continue;
+        $data = $_POST['suggestions'][$i];
+        if (empty($data['title']) && empty($data['description']) && empty($data['pitch']))
+            continue;
+        array_push(
+            $suggestions, $panelist['id'], $i,
+            $data['title'] ?? '', $data['description'] ?? '', $data['pitch'] ?? ''
+        );
+    }
+    if (count($suggestions)) {
+        $addSuggestions = $db->prepare(
+            'INSERT INTO panelist_suggestions (panelist_id, position, title, description, pitch) VALUES ' .
+            implode(', ', array_fill(0, count($suggestions) / 5, '(?, ?, ?, ?, ?)'))
+        );
+        $addSuggestions->execute($suggestions);
+        if ($addSuggestions->rowCount() !== (count($suggestions) / 5)) {
+            return 'Failed to save presentations/workshops - please try again or contact support';
+        }
+    }
+
+    /*
     header('Location: /panels');
     exit;
+     */
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -148,14 +224,18 @@ function topicValue($id) {
     return !empty($_POST['topic'][$id]) || in_array($id, $myTopics);
 }
 function bookValue($id, $field) {
-    // TODO: my books
+    global $myBooks;
     if (!empty($_POST['books']) && !empty($_POST['books'][$id]) && !empty($_POST['books'][$id][$field]))
         return htmlspecialchars($_POST['books'][$id][$field], ENT_QUOTES);
+    if (empty($_POST) && !empty($myBooks[$id]))
+        return htmlspecialchars($myBooks[$id][$field], ENT_QUOTES);
 }
 function suggestionValue($id, $field) {
-    // TODO: my suggestions
+    global $mySuggestions;
     if (!empty($_POST['suggestions']) && !empty($_POST['suggestions'][$id]) && !empty($_POST['suggestions'][$id][$field]))
         return htmlspecialchars($_POST['suggestions'][$id][$field], ENT_QUOTES);
+    if (empty($_POST) && !empty($mySuggestions[$id]))
+        return htmlspecialchars($mySuggestions[$id][$field], ENT_QUOTES);
 }
 function valueIs($key, $check) {
     global $panelist;
