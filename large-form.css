@@ -37,6 +37,18 @@ body.large-form h1 {
     max-height: 200px;
 }
 
+#reading-yes + label ~ label,
+#reading-yes ~ input {
+    display: none;
+}
+#reading-yes:checked + label ~ label,
+#reading-yes:checked ~ input {
+    display: block;
+}
+label[for=reading-topic] {
+    margin-top: 5px;
+}
+
 table input {
     width: 13em;
 }

@@ -44,6 +44,11 @@ function handleForm() {
     if (!empty($_POST['topic']) && !is_array($_POST['topic']))
         return 'Your data is somehow corrupted - please contact us and show us what you did so we can fix it.';
 
+    if (!empty($_POST['reading']) && $_POST['reading'] === 'yes' && empty($_POST['reading_topic']))
+        return 'You must provide a title, topic, or genera which you intend to read';
+    else if (empty($_POST['reading']) || $_POST['reading'] === 'no')
+        $_POST['reading_topic'] = '';
+
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
         !empty($_POST['contact_email']) && !empty($_POST['biography']) && !empty($_POST['topic']) &&
         !empty($_POST['signing']) && !empty($_POST['moderator']) &&
@@ -72,7 +77,7 @@ function handleForm() {
         ':intersectionalities' => $_POST['intersectionalities'] ?? '',
 
         ':signing' => $_POST['signing'] === 'yes',
-        ':reading' => !empty($_POST['reading']) && $_POST['reading'] === 'yes',
+        ':reading' => $_POST['reading_topic'],
         ':moderator' => $_POST['moderator'] === 'yes',
         ':recording' => $_POST['recording'] === 'yes',
         ':share_email' => $_POST['share_email'] === 'yes',
@@ -245,6 +250,10 @@ function valueIs($key, $check) {
         return $panelist[$key] === ($check ? '1' : '0');
     return false;
 }
+function readingValue() {
+    global $panelist;
+    return $_POST['reading_topic'] ?? $panelist['reading'] ?? '';
+}
 ?>
 <?php function booleanForm($name, $required = true) { ?>
     <div class="shrinkwrap">
@@ -322,7 +331,17 @@ function valueIs($key, $check) {
     <?php booleanForm('signing'); ?>
 
     <label>Are you interested in doing a reading of one of your books?</label>
-    <?php booleanForm('reading', false); ?>
+    <div class="shrinkwrap">
+        <input type="radio" id="reading-yes" name="reading" value="yes"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'yes' : !!readingValue()) ? ' checked' : '' ?>>
+        <label for="reading-yes">Yes</label>
+
+        <label for="reading-topic" class="required">Which book, style, or genera?</label>
+        <input id="reading-topic" name="reading_topic" value="<?= readingValue() ?>" />
+    </div>
+    <div class="shrinkwrap">
+        <input type="radio" id="reading-no" name="reading" value="no"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'no' : !readingValue()) ? ' checked' : '' ?>>
+        <label for="reading-no">No</label>
+    </div>
 
     <label class="required">Are you willing to be a moderator?</label>
     <?php booleanForm('moderator'); ?>

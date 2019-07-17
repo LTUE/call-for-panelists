@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS panelists (
     photo_file TINYTEXT CHARACTER SET latin1,
     /* TODO: books? */
     signing BOOLEAN NOT NULL,
-    reading BOOLEAN NOT NULL,
+    reading TINYTEXT,
     moderator BOOLEAN NOT NULL,
     recording BOOLEAN NOT NULL,
     share_email BOOLEAN NOT NULL,
