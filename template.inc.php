@@ -9,7 +9,7 @@
 <body class="large-form">
 <?php if (!empty($_SESSION['account'])): ?>
 <nav>
-    <img src="img/LTUELogo-WithText.png" />
+    <a href="http://ltue.net"><img src="img/LTUELogo-WithText.png" alt="LTUE" /></a>
     <ul>
         <li><a href="/profile">Profile Form</a></li>
         <li><a href="/panels">Panel Selection</a></li>
