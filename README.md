@@ -17,12 +17,9 @@ To import, run something like `tail -n +2 LTUE\ 2020\ Call.csv | php -c php.ini 
 ## TODO
 
 * CSRF on all forms
-* Pull in real data from the spreadsheets
 * Social logins
 * Email - to confirm accounts, and
 * Password reset
-* Picture upload
-* The books/presentation requests
 * Input hours available, limiting shown panels to those
 * Test with bulk data
 
