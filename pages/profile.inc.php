@@ -195,22 +195,39 @@ function handleForm() {
         $panelist['photo_file'] = $photoFile;
     }
 
-    // TODO: make it work right… Don't wipe and reset, remove the removed ones
-    $removeOldTopics = $db->prepare('DELETE FROM panelists_topics WHERE panelist_id = :id');
-    $removeOldTopics->execute(array(':id' => $panelist['id']));
-
-    // TODO: check the id exists? No major risk, probably…
+    global $myTopics;
+    $removedTopics = $myTopics;
     $addedTopics = array();
     foreach (array_keys($_POST['topic']) as $id) {
-        array_push($addedTopics, $panelist['id'], $id);
-    }
-    $addTopicsQuery = 'INSERT INTO panelists_topics (panelist_id, topic_id) VALUES';
-    $addTopicsQuery .= implode(', ', array_fill(0, count($addedTopics) / 2, '(?, ?)'));
-    $addTopics = $db->prepare($addTopicsQuery);
-    $addTopics->execute($addedTopics);
+        if (!array_key_exists($id, $topics))
+            continue;
 
-    if ($addTopics->rowCount() !== (count($addedTopics) / 2))
-        return 'We failed to save your topics. I don\'t know why. Try again?';
+        $index = array_search($id, $removedTopics);
+        if (false !== $index) {
+            array_splice($removedTopics, $index, 1);
+        } else {
+            array_push($addedTopics, $panelist['id'], $id);
+        }
+    }
+    if (count($addedTopics)) {
+        $addTopicsQuery = 'INSERT INTO panelists_topics (panelist_id, topic_id) VALUES';
+        $addTopicsQuery .= implode(', ', array_fill(0, count($addedTopics) / 2, '(?, ?)'));
+        $addTopics = $db->prepare($addTopicsQuery);
+        $addTopics->execute($addedTopics);
+
+        if ($addTopics->rowCount() !== (count($addedTopics) / 2))
+            return 'We failed to save your topics. I don\'t know why. Try again?';
+    }
+    if (count($removedTopics)) {
+        $removeTopics = $db->prepare('DELETE FROM panelists_topics WHERE panelist_id = ? AND topic_id IN (' .
+            implode(', ', array_fill(0, count($removedTopics), '?')) .
+        ')');
+        $removeTopics->execute(array_merge([$panelist['id']], $removedTopics));
+        if ($removeTopics->rowCount() !== count($removedTopics))
+            return 'Something went wrong updating your topics. Try again?';
+
+        // TODO delete where _no_ tags now match
+    }
 
 
     // TODO: slightly less lazy both books and suggestions
