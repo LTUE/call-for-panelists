@@ -32,7 +32,9 @@ $getMyAvailability->execute(array(':id' => $panelist['id']));
 $myAvailability = $getMyAvailability->fetch(PDO::FETCH_ASSOC);
 
 $queryRelevantPanels = <<<SQL
-    SELECT p.*, GROUP_CONCAT(topic_id SEPARATOR ',') AS topic_ids, panel_roles_id, panel_experience_id
+    SELECT
+        p.*, GROUP_CONCAT(topic_id SEPARATOR ',') AS topic_ids,
+        panel_roles_id, panel_experience_id, qualifications
     FROM panelists_topics AS pt
     INNER JOIN panels_topics AS t USING (topic_id)
     INNER JOIN panels AS p ON t.panel_id = p.id
@@ -84,29 +86,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['panels']) && is_arra
             continue; // data is corrupted
         if (empty($panels[$id]))
             continue; // panel was removed or something fishy
+        if (strlen($data['qualifications']) > 200)
+            continue; // TODO: error message; most clients _should_ handle the maxlength though, so less urgent
 
         if (empty($data['interested'])) {
             $data['role'] = '';
             $data['experience'] = '';
+            $data['qualifications'] = '';
         }
 
         // we use weak compare to match '' and NULL
         $needToSave = $data['role'] != $panels[$id]['panel_roles_id'] ||
-            $data['experience'] != $panels[$id]['panel_experience_id'];
+            $data['experience'] != $panels[$id]['panel_experience_id'] ||
+            $data['qualifications'] != $panels[$id]['qualifications'];
         // TODO: delete if NULL and NULL - equivalent. Later
         if ($needToSave) {
             array_push(
                 $saveValues, $panelist['id'], $id,
                 array_key_exists($data['role'], $roles) ? $data['role'] : NULL,
-                array_key_exists($data['experience'], $experiences) ? $data['experience'] : NULL
+                array_key_exists($data['experience'], $experiences) ? $data['experience'] : NULL,
+                $data['qualifications']
             );
         }
     }
 
     if (count($saveValues)) {
-        $saveQuery = 'INSERT INTO panelists_panels (panelist_id, panel_id, panel_roles_id, panel_experience_id)';
-        $saveQuery .= ' VALUES ' . implode(', ', array_fill(0, count($saveValues) / 4, '(?, ?, ?, ?)'));
-        $saveQuery .= ' ON DUPLICATE KEY UPDATE panel_roles_id = VALUES(panel_roles_id), panel_experience_id = VALUES(panel_experience_id)';
+        $saveQuery = 'INSERT INTO panelists_panels (panelist_id, panel_id, panel_roles_id, panel_experience_id, qualifications)';
+        $saveQuery .= ' VALUES ' . implode(', ', array_fill(0, count($saveValues) / 5, '(?, ?, ?, ?, ?)'));
+        $saveQuery .= ' ON DUPLICATE KEY UPDATE panel_roles_id = VALUES(panel_roles_id), panel_experience_id = VALUES(panel_experience_id), qualifications = VALUES(qualifications)';
 
         $save = $db->prepare($saveQuery);
         $save->execute($saveValues);
@@ -162,7 +169,7 @@ function prettyTime($time) {
         <input type="checkbox" id="panel-<?= $panel['id'] ?>-interested" name="panels[<?= $panel['id'] ?>][interested]"<?= $panel['panel_roles_id'] || $panel['panel_experience_id'] ? ' checked' : '' ?>>
         <label for="panel-<?= $panel['id'] ?>-interested">I am interested in this panel</label>
 
-        <label for="panel[<?= $panel['id'] ?>][role]">What is your main role with this subject?</label>
+        <label for="panel-<?= $panel['id'] ?>-role">What is your main role with this subject?</label>
         <select id="panel-<?= $panel['id'] ?>-role" name="panels[<?= $panel['id'] ?>][role]">
             <option value=''<?= empty($panel['panel_roles_id']) ? ' selected' : '' ?>></option>
         <?php foreach ($roles as $id => $name): ?>
@@ -170,13 +177,17 @@ function prettyTime($time) {
         <?php endforeach; ?>
         </select>
 
-        <label for="panel[<?= $panel['id'] ?>][experience]">How knowledgeable are you on the topic of this panel?</label>
+        <label for="panel-<?= $panel['id'] ?>-experience">How knowledgeable are you on the topic of this panel?</label>
         <select id="panel-<?= $panel['id'] ?>-experience" name="panels[<?= $panel['id'] ?>][experience]">
             <option value=''<?= empty($panel['panel_experience_id']) ? ' selected' : '' ?>></option>
         <?php foreach ($experiences as $id => $name): ?>
             <option value="<?= $id ?>"<?= $id == $panel['panel_experience_id'] ? ' selected' : '' ?>><?= htmlspecialchars($name, ENT_QUOTES) ?></option>
         <?php endforeach; ?>
         </select>
+
+        <label for="panel-<?= $panel['id'] ?>-qualifications">If you would like, you may provide context</label>
+        <textarea id="panel-<?= $panel['id'] ?>-qualifications" name="panels[<?= $panel['id'] ?>][qualifications]" maxlength=200><?= $_POST['panels'][$panel['id']]['qualifications'] ?? $panel['qualifications'] ?? '' ?></textarea>
+        <p class="explanation">This is optional, and limited to 200 characters</p>
     </section>
 <?php endforeach; ?>
     <input type="submit" value="Update Panel Selection">

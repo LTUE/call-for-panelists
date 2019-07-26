@@ -180,6 +180,8 @@ CREATE TABLE IF NOT EXISTS panelists_panels (
     panel_roles_id INT UNSIGNED,
     panel_experience_id INT UNSIGNED,
 
+    qualifications TINYTEXT,
+
     CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
     CONSTRAINT FOREIGN KEY (panel_id) REFERENCES panels(id) ON DELETE CASCADE,
     CONSTRAINT FOREIGN KEY (panel_roles_id) REFERENCES panel_roles(id) ON DELETE SET NULL ON UPDATE CASCADE,

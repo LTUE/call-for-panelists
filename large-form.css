@@ -98,6 +98,9 @@ section.panel h3 {
     color: #898989;
     margin: 0;
 }
+section.panel textarea {
+    height: 8ex;
+}
 
 ul.tags {
     list-style-type: none;
@@ -115,10 +118,14 @@ ul.tags li {
 }
 
 section.panel input[type=checkbox] + label ~ label,
-section.panel input[type=checkbox] ~ select {
+section.panel input[type=checkbox] ~ select,
+section.panel input[type=checkbox] ~ textarea,
+section.panel input[type=checkbox] ~ textarea + p {
     display: none;
 }
 section.panel input[type=checkbox]:checked + label ~ label,
-section.panel input[type=checkbox]:checked ~ select {
+section.panel input[type=checkbox]:checked ~ select,
+section.panel input[type=checkbox]:checked ~ textarea,
+section.panel input[type=checkbox]:checked ~ textarea + p {
     display: block;
 }
