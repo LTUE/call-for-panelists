@@ -83,7 +83,7 @@ p.explanation {
 input, p.explanation, select {
     width: 272px;
 }
-textarea, textarea + p.explanation, input[type=file] + p.explanation {
+textarea, textarea + p.explanation, input[type=file] + p.explanation, p.explanation.wide {
     max-width: 80ch;
     width: 100%;
 }

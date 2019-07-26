@@ -2,6 +2,10 @@
 <?php
 $template = 'small-form';
 $title = 'Register';
+if (!empty($_SESSION['panelist_id']) || !empty($_SESSION['account_id'])) {
+    header('Location: /profile');
+    exit;
+}
 ?>
 <?php
 function handleForm() {
@@ -40,7 +44,7 @@ function handleForm() {
     }
     unset($row['password']);
     session_regenerate_id(true); // further prevent fixation attacks
-    $_SESSION['account'] = $row;
+    $_SESSION['account_id'] = $row['id'];
 
     $ch = curl_init();
     curl_setopt_array($ch, [
@@ -88,4 +92,5 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     <input type="submit" value="Register">
 
     <p>Already signed up? <a href="/login">Login</a></p>
+    <p>Or <a href="/profile">continue without an account</a>. You will not be able to change your answers later.</p>
 </form>

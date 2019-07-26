@@ -2,6 +2,10 @@
 <?php
 $template = 'small-form';
 $title = 'Forgot Password';
+if (!empty($_SESSION['panelist_id']) || !empty($_SESSION['account_id'])) {
+    header('Location: /profile');
+    exit;
+}
 ?>
 <?php
 /*

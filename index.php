@@ -15,29 +15,29 @@ session_name('LTUE_PANELIST');
 session_start();
 
 // Single file routing system
-$page = 'register';
+$page = 'login';
+if (!empty($_SESSION['panelist_id']) || !empty($_SESSION['account_id'])) {
+    $page = 'profile';
+}
+
 $path = explode('/', $_SERVER['REQUEST_URI']);
 switch ($path[1]) {
+case '';
+    // keep it simple - same url always
+    header('Location: /' . $page);
+    exit;
+    break;
+case 'register':
 case 'login':
 case 'forgot':
+case 'profile':
+case 'panels':
+case 'logout':
     $page = $path[1];
     break;
-}
-if (!empty($_SESSION['account'])) {
-    $page = 'profile';
-
-    switch($path[1]) {
-    case '':
-    case 'profile':
-        break;
-    case 'panels':
-    case 'logout':
-        $page = $path[1];
-        break;
-    default:
-        echo 'Missing: ' . $_SERVER['REQUEST_URI']; // XXX
-        break;
-    }
+default:
+    echo 'Missing: ' . $_SERVER['REQUEST_URI']; // XXX
+    break;
 }
 
 // Run the page

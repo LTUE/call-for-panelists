@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS panelists (
     /* TODO: presentations/workshops */
     /* TODO: times available; what exactly are they? */
 
-    CONSTRAINT FOREIGN KEY (account_id) REFERENCES accounts(id)
+    CONSTRAINT FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS topics (
@@ -206,6 +206,25 @@ CREATE TABLE IF NOT EXISTS panelist_suggestions (
 
     CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
     PRIMARY KEY (panelist_id, position)
+);
+
+/* TODO: this is not good - only virtue is that I put in minimal thought */
+CREATE TABLE IF NOT EXISTS panelist_availability (
+    panelist_id INT UNSIGNED NOT NULL PRIMARY KEY,
+
+    thu_morn BOOL NOT NULL,
+    thu_day BOOL NOT NULL,
+    thu_even BOOL NOT NULL,
+
+    fri_morn BOOL NOT NULL,
+    fri_day BOOL NOT NULL,
+    fri_even BOOL NOT NULL,
+
+    sat_morn BOOL NOT NULL,
+    sat_day BOOL NOT NULL,
+    sat_even BOOL NOT NULL,
+
+    CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE
 );
 
 SET sql_notes = 1;

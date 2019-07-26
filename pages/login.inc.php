@@ -2,6 +2,10 @@
 <?php
 $template = 'small-form';
 $title = 'Login';
+if (!empty($_SESSION['panelist_id']) || !empty($_SESSION['account_id'])) {
+    header('Location: /profile');
+    exit;
+}
 ?>
 <?php
 if (!empty($_POST['email']) && !empty($_POST['password'])) {
@@ -12,8 +16,11 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     if (!empty($row['password']) && password_verify($_POST['password'], $row['password'])) {
         unset($row['password']);
         session_regenerate_id(true); // further prevent fixation attacks
-        $_SESSION['account'] = $row;
-        header('Location: /');
+        $_SESSION['account_id'] = $row['id'];
+
+        // TODO: pull panelist id here, or continue to rely on redirecting to profile first?
+
+        header('Location: /profile');
         exit;
     } else {
         // TODO: password reset, send out emails
@@ -34,4 +41,5 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     <input type="submit" value="Log in">
     <a id="forgot-link" href="/forgot">Forgot Password?</a>
     <p>Haven't made an account? <a href="/register">Register</a></p>
+    <p>Or <a href="/profile">continue without an account</a>. You will not be able to change your answers later.</p>
 </form>

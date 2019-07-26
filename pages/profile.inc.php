@@ -1,9 +1,25 @@
 <?php defined('INCLUDED') or die(); ?>
 <?php $title = 'Profile Form' ?>
 <?php
-$getPanelist = $db->prepare('SELECT * FROM panelists WHERE account_id = :id');
-$getPanelist->execute(array(':id' => $_SESSION['account']['id']));
-$panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
+if (!empty($_SESSION['account_id'])) {
+    $getAccount = $db->prepare('SELECT email FROM accounts WHERE id = :id');
+    $getAccount->execute(array(':id' => $_SESSION['account_id']));
+    $account = $getAccount->fetch(PDO::FETCH_ASSOC);
+}
+
+$getPanelist = $db->prepare('SELECT * FROM panelists WHERE id = :id');
+$panelist = NULL;
+if (!empty($_SESSION['panelist_id'])) {
+    $getPanelist->execute(array(':id' => $_SESSION['panelist_id']));
+    $panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
+} else if (!empty($_SESSION['account_id'])) {
+    $getPanelistFromAccount = $db->prepare('SELECT * FROM panelists WHERE account_id = :account_id');
+    $getPanelistFromAccount->execute(array(':account_id' => $_SESSION['account_id']));
+    $panelist = $getPanelistFromAccount->fetch(PDO::FETCH_ASSOC);
+    if (!empty($panelist)) {
+        $_SESSION['panelist_id'] = $panelist['id'];
+    }
+}
 
 $topics = array_column($db->query(
     'SELECT id, name FROM topics ORDER BY name ASC'
@@ -18,6 +34,7 @@ if (!empty($panelist)) {
 
 $myBooks = [];
 $mySuggestions = [];
+$myAvailability = [];
 if ($panelist) {
     $getMyBooks = $db->prepare(
         'SELECT position, title, author, isbn FROM books_to_stock WHERE panelist_id = :id'
@@ -34,6 +51,11 @@ if ($panelist) {
     foreach ($getMySuggestions->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $mySuggestions[$row['position']] = $row;
     }
+
+
+    $getMyAvailability = $db->prepare('SELECT * FROM panelist_availability WHERE panelist_id = :id');
+    $getMyAvailability->execute(array(':id' => $panelist['id']));
+    $myAvailability = $getMyAvailability->fetch(PDO::FETCH_ASSOC);
 }
 
 function handleForm() {
@@ -75,15 +97,17 @@ function handleForm() {
             return 'Validation failed - no presentation/workshop pitch may exceed 500 characters';
     }
 
-
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
-        !empty($_POST['contact_email']) && !empty($_POST['biography']) && !empty($_POST['topic']) &&
+        !empty($_POST['contact_email']) && !empty($_POST['biography']) &&
+        !empty($_POST['topic']) && !empty($_POST['available']) &&
         !empty($_POST['signing']) && !empty($_POST['moderator']) &&
         !empty($_POST['recording']) && !empty($_POST['share_email']);
     if (!$sufficientData) {
         // client-side validation should catch most missing fields, so simple check and fail
         if (empty($_POST['topic']))
             return 'You must select at least one interesting type of panel';
+        else if (empty($_POST['available']))
+            return 'You must select at least one availability group';
         else
             return 'Please complete all required sections of the form, marked with a *';
     }
@@ -97,7 +121,6 @@ function handleForm() {
         recording = :recording, share_email = :share_email
     ';
     $data = [
-        ':account_id' => $_SESSION['account']['id'],
         ':name' => $_POST['name'],
         ':badge_name' => $_POST['badge_name'],
         ':contact_email' => $_POST['contact_email'],
@@ -112,10 +135,13 @@ function handleForm() {
         ':share_email' => $_POST['share_email'] === 'yes',
     ];
 
-    if (empty($panelist))
+    if (empty($panelist)) {
         $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, ' . $profileSet;
-    else
-        $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE account_id = :account_id';
+        $data[':account_id'] = $_SESSION['account_id'] ?? NULL;
+    } else {
+        $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE id = :id';
+        $data[':id'] = $_SESSION['panelist_id'];
+    }
     $saveProfile = $db->prepare($saveQuery);
     $saveProfile->execute($data);
 
@@ -125,7 +151,9 @@ function handleForm() {
 
     if (empty($panelist)) {
         global $getPanelist;
-        $getPanelist->execute(array(':id' => $_SESSION['account']['id']));
+        session_regenerate_id(true); // further prevent fixation attacks
+        $_SESSION['panelist_id'] = $db->lastInsertId();
+        $getPanelist->execute(array(':id' => $_SESSION['panelist_id']));
         $panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -159,7 +187,7 @@ function handleForm() {
         if (!move_uploaded_file($_FILES['picture']['tmp_name'], $uploadDir . DIRECTORY_SEPARATOR . $photoFile))
             return 'Failed to store your photo - please contact support';
 
-        $savePhoto = $db->prepare('UPDATE panelists SET photo_file = ? WHERE account_id = ?');
+        $savePhoto = $db->prepare('UPDATE panelists SET photo_file = ? WHERE id = ?');
         $savePhoto->execute([$photoFile, $panelist['id']]);
         if ($savePhoto->rowCount() !== 1)
             return 'Failed to save your photo - please contact support';
@@ -238,6 +266,32 @@ function handleForm() {
         }
     }
 
+
+    // TODO: bad architecture; should do something w/time ranges instead.
+    // TODO: remove interested panels when changing availability!
+    // TODO: same for categories - remove interest when removing categories
+    $setAvailability = $db->prepare(
+        'INSERT INTO panelist_availability (' .
+            'panelist_id, thu_morn, thu_day, thu_even, fri_morn, fri_day, fri_even, sat_morn, sat_day, sat_even' .
+        ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' .
+        ' ON DUPLICATE KEY UPDATE ' .
+        'thu_morn = VALUES(thu_morn), thu_day = VALUES(thu_day), thu_even = VALUES(thu_even), ' .
+        'fri_morn = VALUES(fri_morn), fri_day = VALUES(fri_day), fri_even = VALUES(fri_even), ' .
+        'sat_morn = VALUES(sat_morn), sat_day = VALUES(sat_day), sat_even = VALUES(sat_even)'
+    );
+    $setAvailability->execute(array(
+        $panelist['id'],
+        !empty($_POST['available']['thu']['morn']),
+        !empty($_POST['available']['thu']['day']),
+        !empty($_POST['available']['thu']['even']),
+        !empty($_POST['available']['fri']['morn']),
+        !empty($_POST['available']['fri']['day']),
+        !empty($_POST['available']['fri']['even']),
+        !empty($_POST['available']['sat']['morn']),
+        !empty($_POST['available']['sat']['day']),
+        !empty($_POST['available']['sat']['even']),
+    ));
+
     /*
     header('Location: /panels');
     exit;
@@ -270,6 +324,12 @@ function suggestionValue($id, $field) {
         return htmlspecialchars($_POST['suggestions'][$id][$field], ENT_QUOTES);
     if (empty($_POST) && !empty($mySuggestions[$id]))
         return htmlspecialchars($mySuggestions[$id][$field], ENT_QUOTES);
+}
+function availabilityValue($day, $part) {
+    global $myAvailability;
+    return !empty($_POST['available'][$day][$part]) || (
+        empty($_POST) && !empty($myAvailability[$day . '_' . $part])
+    );
 }
 function valueIs($key, $check) {
     global $panelist;
@@ -312,7 +372,7 @@ function readingValue() {
     <p class="explanation">Name as you would like it to appear on badge and table tent (Pen Name)</p>
 
     <label class="required" for="contact_email">Contact Email:</label>
-    <input type="email" id="contact_email" name="contact_email" required value="<?= value('contact_email') ?: $_SESSION['account']['email'] ?>">
+    <input type="email" id="contact_email" name="contact_email" required value="<?= value('contact_email') ?: ($account['email'] ?? '') ?>">
     <p class="explanation">You will be notified if you are accepted as a panelist/presenter through this email.</p>
 
     <label for="website">Website</label>
@@ -368,7 +428,7 @@ function readingValue() {
         <input id="reading-topic" name="reading_topic" maxlength=100 value="<?= readingValue() ?>" />
     </div>
     <div class="shrinkwrap">
-        <input type="radio" id="reading-no" name="reading" value="no"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'no' : !readingValue()) ? ' checked' : '' ?>>
+        <input type="radio" id="reading-no" name="reading" value="no"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'no' : !readingValue() && !empty($panelist)) ? ' checked' : '' ?>>
         <label for="reading-no">No</label>
     </div>
 
@@ -378,9 +438,9 @@ function readingValue() {
     <label class="required">Is it okay if LTUE records your panels/presentations during the event?</label>
     <?php booleanForm('recording'); ?>
 
-    <p class="required">Is it okay if LTUE shares your email with other panelists/moderators who are assigned to the same panels as you? Sharing your email will allow the moderator to contact you and coordinate seed questions.</p>
-    <p><strong>Note:</strong> LTUE has a strict confidentiality policy, and will never share your email address without your express permission.</p>
+    <label class="required">Is it okay if LTUE shares your email with other panelists/moderators who are assigned to the same panels as you?</label>
     <?php booleanForm('share_email'); ?>
+    <p class="explanation wide"> Sharing your email will allow the moderator to contact you and coordinate seed questions. <strong>Note:</strong> LTUE has a strict confidentiality policy, and will never share your email address without your express permission.</p>
 
     <!-- TODO: presentation - 3 again -->
     <p>Do you have a presentation or a workshop that you would like to run? If so, please give us a title, description, and a pitch for the programming. We will contact you with possible time slots in November, if your presentation is selected.</p>
@@ -412,21 +472,21 @@ function readingValue() {
         </tr>
         <tr>
             <th>Thursday Feb. 13, 2020</th>
-            <td><label><input type="checkbox" name="available[thu][morn]" value="TODO" /></label></td>
-            <td><label><input type="checkbox" name="available[thu][day]" value="TODO" /></label></td>
-            <td><label><input type="checkbox" name="available[thu][even]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[thu][morn]" <?= availabilityValue('thu', 'morn') ? 'checked ' : '' ?>/></label></td>
+            <td><label><input type="checkbox" name="available[thu][day]" <?= availabilityValue('thu', 'day') ? 'checked ' : '' ?>/></label></td>
+            <td><label><input type="checkbox" name="available[thu][even]" <?= availabilityValue('thu', 'even') ? 'checked ' : '' ?>/></label></td>
         </tr>
         <tr>
             <th>Friday Feb. 14, 2020</th>
-            <td><label><input type="checkbox" name="available[fri][morn]" value="TODO" /></label></td>
-            <td><label><input type="checkbox" name="available[fri][day]" value="TODO" /></label></td>
-            <td><label><input type="checkbox" name="available[fri][even]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[fri][morn]"<?= availabilityValue('fri', 'morn') ? 'checked ' : '' ?>/></label></td>
+            <td><label><input type="checkbox" name="available[fri][day]"<?= availabilityValue('fri', 'day') ? 'checked ' : '' ?>/></label></td>
+            <td><label><input type="checkbox" name="available[fri][even]"<?= availabilityValue('fri', 'even') ? 'checked ' : '' ?>/></label></td>
         </tr>
         <tr>
             <th>Saturday Feb. 15, 2020</th>
-            <td><label><input type="checkbox" name="available[sat][morn]" value="TODO" /></label></td>
-            <td><label><input type="checkbox" name="available[sat][day]" value="TODO" /></label></td>
-            <td><label><input type="checkbox" name="available[sat][even]" value="TODO" /></label></td>
+            <td><label><input type="checkbox" name="available[sat][morn]"<?= availabilityValue('sat', 'morn') ? 'checked ' : '' ?>/></label></td>
+            <td><label><input type="checkbox" name="available[sat][day]"<?= availabilityValue('sat', 'day') ? 'checked ' : '' ?>/></label></td>
+            <td><label><input type="checkbox" name="available[sat][even]"<?= availabilityValue('sat', 'even') ? 'checked ' : '' ?>/></label></td>
         </tr>
     </table>
 

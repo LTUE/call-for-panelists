@@ -1,8 +1,13 @@
 <?php defined('INCLUDED') or die(); ?>
 <?php $title = 'Panel Selection' ?>
 <?php
-$getPanelist = $db->prepare('SELECT * FROM panelists WHERE account_id = :id');
-$getPanelist->execute(array(':id' => $_SESSION['account']['id']));
+if (empty($_SESSION['panelist_id'])) {
+    header('Location: /profile');
+    exit;
+}
+$getPanelist = $db->prepare('SELECT * FROM panelists WHERE id = :id');
+// TODO panelist id in session
+$getPanelist->execute(array(':id' => $_SESSION['panelist_id']));
 $panelist = $getPanelist->fetch(PDO::FETCH_ASSOC);
 // TODO: flash message for forced navigation, or don't show the links, or something
 if (empty($panelist)) {
@@ -20,6 +25,12 @@ $experiences = array_column($db->query(
     'SELECT id, name FROM panel_experience ORDER BY id ASC'
 )->fetchAll(PDO::FETCH_ASSOC), 'name', 'id');
 
+
+// TODO: this is really bad - we need to fix the table to have hour ranges
+$getMyAvailability = $db->prepare('SELECT * FROM panelist_availability WHERE panelist_id = :id');
+$getMyAvailability->execute(array(':id' => $panelist['id']));
+$myAvailability = $getMyAvailability->fetch(PDO::FETCH_ASSOC);
+
 $queryRelevantPanels = <<<SQL
     SELECT p.*, GROUP_CONCAT(topic_id SEPARATOR ',') AS topic_ids, panel_roles_id, panel_experience_id
     FROM panelists_topics AS pt
@@ -33,6 +44,37 @@ $getRelevantPanels = $db->prepare($queryRelevantPanels);
 $getRelevantPanels->execute(array(':panelist_id' => $panelist['id']));
 $panelData = $getRelevantPanels->fetchAll(PDO::FETCH_ASSOC);
 $panels = array_combine(array_column($panelData, 'id'), $panelData);
+
+// TODO: see, really bad!
+$panels = array_filter($panels, function($panel) use ($myAvailability) {
+    $day = date('l', strtotime($panel['day']));
+    $hour = ltrim(explode(':', $panel['time'])[0], '0') + 0;
+    if ($day === 'Thursday') {
+        if ($hour > 12)
+            return $myAvailability['thu_morn'];
+        else if ($hour > 4)
+            return $myAvailability['thu_day'];
+        else
+            return $myAvailability['thu_even'];
+    } else if ($day === 'Friday') {
+        if ($hour > 12)
+            return $myAvailability['fri_morn'];
+        else if ($hour > 4)
+            return $myAvailability['fri_day'];
+        else
+            return $myAvailability['fri_even'];
+    } else if ($day === 'Saturday') {
+        if ($hour > 12)
+            return $myAvailability['sat_morn'];
+        else if ($hour > 4)
+            return $myAvailability['sat_day'];
+        else
+            return $myAvailability['sat_even'];
+    } else {
+        trigger_error('Unknown day ' . $day, E_USER_ERROR);
+        return false;
+    }
+});
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['panels']) && is_array($_POST['panels'])) {
     $saveValues = array();
