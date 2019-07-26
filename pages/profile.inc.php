@@ -330,7 +330,7 @@ function readingValue() {
     <label class="required">Are you interested in participating in the LTUE Mass Signing on Friday February 14<sup>th</sup> from 6:30 pm to 8:00 pm?</label>
     <?php booleanForm('signing'); ?>
 
-    <label>Are you interested in doing a reading of one of your books?</label>
+    <label>Would you be interested in doing a reading of one of your books?</label>
     <div class="shrinkwrap">
         <input type="radio" id="reading-yes" name="reading" value="yes"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'yes' : !!readingValue()) ? ' checked' : '' ?>>
         <label for="reading-yes">Yes</label>
