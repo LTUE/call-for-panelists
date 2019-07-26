@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     email VARCHAR(191) UNIQUE NOT NULL,
     password TINYTEXT CHARACTER SET latin1 NOT NULL,
     type VARCHAR(20) NOT NULL,
+    reset_counter SMALLINT NOT NULL DEFAULT 0,
 
     CONSTRAINT FOREIGN KEY (type) REFERENCES account_types(type)
 );

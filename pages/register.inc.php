@@ -1,5 +1,8 @@
 <?php defined('INCLUDED') or die(); ?>
-<?php $template = 'small-form' ?>
+<?php
+$template = 'small-form';
+$title = 'Register';
+?>
 <?php
 function handleForm() {
     global $db;
@@ -17,7 +20,6 @@ function handleForm() {
 
     // email must be unique or warn the user
     if (!empty($row['email'])) {
-        // TODO: password reset
         return 'It appears that email may have already registered. Try logging in again, or contact support?';
     }
 
@@ -39,6 +41,30 @@ function handleForm() {
     unset($row['password']);
     session_regenerate_id(true); // further prevent fixation attacks
     $_SESSION['account'] = $row;
+
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => 'https://api.mailgun.net/v3/panelists.ltue.org/messages',
+        CURLOPT_USERPWD => 'api:' . MAILGUN_API_KEY,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => [
+            'from' => 'LTUE Call For Panelists <mailgun@panelists.ltue.org>',
+            'to' => $row['email'],
+            'subject' => 'Your LTUE Panelist Account',
+            'text' => <<<TEXT
+Thank you for your willingness to support LTUE!
+
+If you would like to update your contact information, schedule, or panel
+interests, you can login using your password and this email address.
+TEXT
+        ],
+    ]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    // TODO: check response code for success
+
     header('Location: /');
     exit;
 }

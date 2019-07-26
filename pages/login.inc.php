@@ -1,5 +1,8 @@
 <?php defined('INCLUDED') or die(); ?>
-<?php $template = 'small-form' ?>
+<?php
+$template = 'small-form';
+$title = 'Login';
+?>
 <?php
 if (!empty($_POST['email']) && !empty($_POST['password'])) {
     $query = $db->prepare('SELECT * FROM accounts WHERE email = :email');
@@ -29,5 +32,6 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     <input type="password" id="password" name="password">
 
     <input type="submit" value="Log in">
+    <a id="forgot-link" href="/forgot">Forgot Password?</a>
     <p>Haven't made an account? <a href="/register">Register</a></p>
 </form>

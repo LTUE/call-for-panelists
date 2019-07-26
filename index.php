@@ -16,24 +16,26 @@ session_start();
 
 // Single file routing system
 $page = 'register';
-if ($_SERVER['REQUEST_URI'] === '/login') {
-    $page = 'login';
+$path = explode('/', $_SERVER['REQUEST_URI']);
+switch ($path[1]) {
+case 'login':
+case 'forgot':
+    $page = $path[1];
+    break;
 }
 if (!empty($_SESSION['account'])) {
     $page = 'profile';
 
-    switch($_SERVER['REQUEST_URI']) {
-    case '/':
-    case '/profile':
+    switch($path[1]) {
+    case '':
+    case 'profile':
         break;
-    case '/panels':
-        $page = 'panels';
-        break;
-    case '/logout':
-        $page = $_SERVER['REQUEST_URI'];
+    case 'panels':
+    case 'logout':
+        $page = $path[1];
         break;
     default:
-        echo $_SERVER['REQUEST_URI']; // XXX
+        echo 'Missing: ' . $_SERVER['REQUEST_URI']; // XXX
         break;
     }
 }

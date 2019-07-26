@@ -18,8 +18,6 @@ To import, run something like `tail -n +2 LTUE\ 2020\ Call.csv | php -c php.ini 
 
 * CSRF on all forms
 * Social logins
-* Email - to confirm accounts, and
-* Password reset
 * Input hours available, limiting shown panels to those
 * Test with bulk data
 

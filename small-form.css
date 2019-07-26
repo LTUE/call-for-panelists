@@ -16,11 +16,11 @@ body.small-form {
     font-weight: bold;
 }
 
-body.small-form label {
+label {
     letter-spacing: 0.44px;
 }
 
-body.small-form hr {
+body.small-form > hr {
     width: 2px;
     background-color: #979797;
     border: 0;
@@ -60,4 +60,9 @@ body.small-form p {
 }
 body.small-form a {
     color: #1593c0;
+}
+
+a#forgot-link {
+    display: inline-block;
+    margin-top: 20px;
 }
