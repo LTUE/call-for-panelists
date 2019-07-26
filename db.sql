@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS panelist_suggestions (
     panelist_id INT UNSIGNED NOT NULL,
     position TINYINT UNSIGNED NOT NULL,
     title TINYTEXT,
-    description TEXT,
+    description TINYTEXT,
     pitch TEXT,
 
     CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,

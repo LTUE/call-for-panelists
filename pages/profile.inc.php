@@ -49,6 +49,33 @@ function handleForm() {
     else if (empty($_POST['reading']) || $_POST['reading'] === 'no')
         $_POST['reading_topic'] = '';
 
+    if (!empty($_POST['reading_topic']) && $_POST['reading_topic'] > 100)
+        return 'Your reading book/style/genera description is too long';
+
+    for ($i = 1; $i <= 3; $i++) {
+        if (empty($_POST['books'][$i]))
+            continue;
+        $data = $_POST['books'][$i];
+        if (!empty($data['title']) && strlen($data['title']) > 50)
+            return 'Validation failed - no book title may exceed 50 characters';
+        if (!empty($data['author']) && strlen($data['author']) > 50)
+            return 'Validation failed - no book author may exceed 50 characters';
+        if (!empty($data['isbn']) && strlen($data['isbn']) > 50)
+            return 'Validation failed - no book ISBN may exceed 20 characters';
+    }
+    for ($i = 1; $i <= 3; $i++) {
+        if (empty($_POST['suggestions'][$i]))
+            continue;
+        $data = $_POST['suggestions'][$i];
+        if (!empty($data['title']) && strlen($data['title']) > 50)
+            return 'Validation failed - no presentation/workshop title may exceed 50 characters';
+        if (!empty($data['description']) && strlen($data['description']) > 50)
+            return 'Validation failed - no presentation/workshop description may exceed 50 characters';
+        if (!empty($data['pitch']) && strlen($data['pitch']) > 500)
+            return 'Validation failed - no presentation/workshop pitch may exceed 500 characters';
+    }
+
+
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
         !empty($_POST['contact_email']) && !empty($_POST['biography']) && !empty($_POST['topic']) &&
         !empty($_POST['signing']) && !empty($_POST['moderator']) &&
@@ -60,6 +87,8 @@ function handleForm() {
         else
             return 'Please complete all required sections of the form, marked with a *';
     }
+
+    // Validation done - good to save
 
     $profileSet = '
         name = :name, badge_name = :badge_name, contact_email = :contact_email, website = :website,
@@ -320,9 +349,9 @@ function readingValue() {
         <?php for ($i = 1; $i <= 3; $i++): ?>
         <tr>
             <th><?= $i ?>.</th>
-            <td><input type="text" name="books[<?= $i ?>][title]" value="<?= bookValue($i, 'title') ?>" /></td>
-            <td><input type="text" name="books[<?= $i ?>][author]" value="<?= bookValue($i, 'author') ?>" /></td>
-            <td><input type="text" name="books[<?= $i ?>][isbn]" value="<?= bookValue($i, 'isbn') ?>" /></td>
+            <td><input type="text" name="books[<?= $i ?>][title]" maxlength=50 value="<?= bookValue($i, 'title') ?>" /></td>
+            <td><input type="text" name="books[<?= $i ?>][author]" maxlength=50 value="<?= bookValue($i, 'author') ?>" /></td>
+            <td><input type="text" name="books[<?= $i ?>][isbn]" maxlength=20 value="<?= bookValue($i, 'isbn') ?>" /></td>
         </tr>
         <?php endfor; ?>
     </table>
@@ -336,7 +365,7 @@ function readingValue() {
         <label for="reading-yes">Yes</label>
 
         <label for="reading-topic" class="required">Which book, style, or genera?</label>
-        <input id="reading-topic" name="reading_topic" value="<?= readingValue() ?>" />
+        <input id="reading-topic" name="reading_topic" maxlength=100 value="<?= readingValue() ?>" />
     </div>
     <div class="shrinkwrap">
         <input type="radio" id="reading-no" name="reading" value="no"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'no' : !readingValue()) ? ' checked' : '' ?>>
@@ -365,9 +394,9 @@ function readingValue() {
         <?php for ($i = 1; $i <= 3; $i++): ?>
         <tr>
             <th><?= $i ?>.</th>
-            <td><input type="text" name="suggestions[<?= $i ?>][title]" value="<?= suggestionValue($i, 'title') ?>" /></td>
-            <td><input type="text" name="suggestions[<?= $i ?>][description]" value="<?= suggestionValue($i, 'description') ?>" /></td>
-            <td><input type="text" name="suggestions[<?= $i ?>][pitch]" value="<?= suggestionValue($i, 'pitch') ?>" /></td>
+            <td><input type="text" name="suggestions[<?= $i ?>][title]" maxlength=50 value="<?= suggestionValue($i, 'title') ?>" /></td>
+            <td><input type="text" name="suggestions[<?= $i ?>][description]" maxlength=50 value="<?= suggestionValue($i, 'description') ?>" /></td>
+            <td><input type="text" name="suggestions[<?= $i ?>][pitch]" maxlength=500 value="<?= suggestionValue($i, 'pitch') ?>" /></td>
         </tr>
         <?php endfor; ?>
     </table>
