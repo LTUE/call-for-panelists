@@ -166,7 +166,12 @@ CREATE TABLE IF NOT EXISTS panel_experience (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(191) UNIQUE NOT NULL
 );
-INSERT IGNORE INTO panel_experience (name) VALUES ('1-5'), ('6-10'), ('10-20'), ('20+');
+INSERT IGNORE INTO panel_experience (name) VALUES
+('A Little Knowledgeable'),
+('Moderately Knowledgeable'),
+('Very Knowledgeable'),
+('Extremely Knowledgeable'),
+('One of the top experts in the world');
 
 /* TODO - assigned flag, description for later performance; unless we want to split assigned from interest; maybe */
 CREATE TABLE IF NOT EXISTS panelists_panels (
@@ -177,8 +182,8 @@ CREATE TABLE IF NOT EXISTS panelists_panels (
 
     CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
     CONSTRAINT FOREIGN KEY (panel_id) REFERENCES panels(id) ON DELETE CASCADE,
-    CONSTRAINT FOREIGN KEY (panel_roles_id) REFERENCES panel_roles(id),
-    CONSTRAINT FOREIGN KEY (panel_experience_id) REFERENCES panel_experience(id),
+    CONSTRAINT FOREIGN KEY (panel_roles_id) REFERENCES panel_roles(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (panel_experience_id) REFERENCES panel_experience(id) ON DELETE SET NULL ON UPDATE CASCADE,
     PRIMARY KEY (panelist_id, panel_id)
 );
 

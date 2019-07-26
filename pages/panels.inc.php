@@ -128,7 +128,7 @@ function prettyTime($time) {
         <?php endforeach; ?>
         </select>
 
-        <label for="panel[<?= $panel['id'] ?>][experience]">How many years of experience do you have in that role?</label>
+        <label for="panel[<?= $panel['id'] ?>][experience]">How knowledgeable are you on the topic of this panel?</label>
         <select id="panel-<?= $panel['id'] ?>-experience" name="panels[<?= $panel['id'] ?>][experience]">
             <option value=''<?= empty($panel['panel_experience_id']) ? ' selected' : '' ?>></option>
         <?php foreach ($experiences as $id => $name): ?>
