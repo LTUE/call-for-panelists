@@ -31,13 +31,15 @@ $getMyAvailability = $db->prepare('SELECT * FROM panelist_availability WHERE pan
 $getMyAvailability->execute(array(':id' => $panelist['id']));
 $myAvailability = $getMyAvailability->fetch(PDO::FETCH_ASSOC);
 
+// TODO: query got messier when I realized I wasn't showing all topics - clean it up later
 $queryRelevantPanels = <<<SQL
     SELECT
-        p.*, GROUP_CONCAT(topic_id SEPARATOR ',') AS topic_ids,
+        p.*, GROUP_CONCAT(DISTINCT t2.topic_id SEPARATOR ',') AS topic_ids,
         panel_roles_id, panel_experience_id, qualifications
     FROM panelists_topics AS pt
     INNER JOIN panels_topics AS t USING (topic_id)
     INNER JOIN panels AS p ON t.panel_id = p.id
+    INNER JOIN panels_topics AS t2 ON p.id = t2.panel_id
     LEFT JOIN panelists_panels AS pp ON pp.panel_id = p.id AND pp.panelist_id = :panelist_id
     WHERE pt.panelist_id = :panelist_id
     GROUP BY p.id
