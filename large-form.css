@@ -1,3 +1,7 @@
+html {
+    background-attachment: fixed;
+}
+
 nav > a {
     display: inline-block;
 }
