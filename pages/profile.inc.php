@@ -1,6 +1,9 @@
 <?php defined('INCLUDED') or die(); ?>
 <?php $title = 'Profile Form' ?>
 <?php
+
+define('MAX_UPLOAD_SIZE', 2 * 1024 * 1024); // 2 MiB
+
 if (!empty($_SESSION['account_id'])) {
     $getAccount = $db->prepare('SELECT email FROM accounts WHERE id = :id');
     $getAccount->execute(array(':id' => $_SESSION['account_id']));
@@ -172,7 +175,7 @@ function handleForm() {
             return 'File extension unknown - please upload a .jpeg, .jpg, .gif, or .png';
         }
 
-        if ($_FILES['picture']['size'] > 1000000)
+        if ($_FILES['picture']['size'] > MAX_UPLOAD_SIZE)
             return 'Photo file too large';
 
         $uploadDir = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'uploads';
@@ -404,7 +407,7 @@ function readingValue() {
     <p class="explanation">Please describe any <span title="age, race, gender, sexual preferences, etc">intersectionalities</span> you would like us to know about you.</p>
 
     <!-- TODO: preview or iframe, as in Mike's example -->
-    <input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
+    <input type="hidden" name="MAX_FILE_SIZE" value="<?= MAX_UPLOAD_SIZE ?>" />
     <label for="picture">Profile Photo</label>
     <?php if ($panelist['photo_file']): ?>
     <figure id="current-picture">
