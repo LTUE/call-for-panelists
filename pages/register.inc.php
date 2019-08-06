@@ -46,6 +46,20 @@ function handleForm() {
     session_regenerate_id(true); // further prevent fixation attacks
     $_SESSION['account_id'] = $row['id'];
 
+    $email_text = <<<TEXT
+Thank you for your willingness to support LTUE!
+
+If you would like to update your contact information, schedule, or panel
+interests, you can login at panelists.ltue.org using your password and this
+email address.
+TEXT;
+    $email_html = <<<HTML
+<p>Thank you for your willingness to support LTUE!</p>
+<p>If you would like to update your contact information, schedule, or panel
+interests, you can login at <a
+href="https://panelists.ltue.org/">panelists.ltue.org</a> using your password
+and this email address.</p>
+HTML;
     $ch = curl_init();
     curl_setopt_array($ch, [
         CURLOPT_URL => 'https://api.mailgun.net/v3/panelists.ltue.org/messages',
@@ -56,12 +70,8 @@ function handleForm() {
             'from' => 'LTUE Call For Panelists <mailgun@panelists.ltue.org>',
             'to' => $row['email'],
             'subject' => 'Your LTUE Panelist Account',
-            'text' => <<<TEXT
-Thank you for your willingness to support LTUE!
-
-If you would like to update your contact information, schedule, or panel
-interests, you can login using your password and this email address.
-TEXT
+            'text' => $email_text,
+            'html' => $email_html,
         ],
     ]);
     $response = curl_exec($ch);
