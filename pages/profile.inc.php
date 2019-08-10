@@ -164,7 +164,7 @@ function handleForm() {
         return 'Error - picture missing';
     // TODO: needs a way to clear the picture as well, not just replace
     if ($_FILES['picture']['tmp_name']) {
-        $ext = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
+        $ext = strtolower(pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION));
         switch ($ext) {
         case 'jpg':
         case 'jpeg':
