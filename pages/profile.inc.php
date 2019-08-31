@@ -312,10 +312,8 @@ function handleForm() {
         !empty($_POST['available']['sat']['even']),
     ));
 
-    /*
     header('Location: /panels');
     exit;
-     */
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
