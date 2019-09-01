@@ -20,7 +20,7 @@ if (!empty($_SESSION['panelist_id']) || !empty($_SESSION['account_id'])) {
     $page = 'profile';
 }
 
-$path = explode('/', $_SERVER['REQUEST_URI']);
+$path = explode('/', parse_url($_SERVER['REQUEST_URI'])['path']);
 switch ($path[1]) {
 case '';
     // keep it simple - same url always
