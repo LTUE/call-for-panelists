@@ -1,5 +1,7 @@
 <?php
 
+die('The call is closed for LTUE 2020 - please try back again next year :).');
+
 // checked in in-webroot files to prevent direct access in case the .htaccess is corrupted…
 // TODO: don't put included files in the webroot :P.
 define('INCLUDED', true);
