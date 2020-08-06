@@ -98,7 +98,7 @@ function handleForm() {
 
     $profileSet = '
         name = :name, badge_name = :badge_name, contact_email = :contact_email, website = :website,
-        biography = :biography, intersectionalities = :intersectionalities,
+        biography = :biography, info = :info,
         signing = :signing, reading = :reading, moderator = :moderator,
         recording = :recording, share_email = :share_email
     ';
@@ -108,7 +108,7 @@ function handleForm() {
         ':contact_email' => $_POST['contact_email'],
         ':website' => $_POST['website'] ?? '',
         ':biography' => $_POST['biography'],
-        ':intersectionalities' => $_POST['intersectionalities'] ?? '',
+        ':info' => $_POST['info'] ?? '',
 
         ':signing' => $_POST['signing'] === 'yes',
         ':reading' => $_POST['reading_topic'],
@@ -347,9 +347,9 @@ function readingValue() {
     <textarea id="biography" name="biography" required maxlength=500><?= value('biography') ?></textarea>
     <p class="explanation">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come hear you speak.</p>
 
-    <label class="long" for="intersectionalities">Additional info</label>
-    <textarea id="intersectionalities" name="intersectionalities"><?= value('intersectionalities') ?></textarea>
-    <p class="explanation">Please describe any <span title="age, race, gender, sexual preferences, etc">intersectionalities</span> you would like us to know about you.</p>
+    <label class="long" for="info">Additional info</label>
+    <textarea id="info" name="info"><?= value('info') ?></textarea>
+    <p class="explanation">Please provide any additional information that can help us understand your qualifications, the type of work you do, your unique circumstances, etc.</p>
 
     <!-- TODO: preview or iframe, as in Mike's example -->
     <input type="hidden" name="MAX_FILE_SIZE" value="<?= MAX_UPLOAD_SIZE ?>" />
