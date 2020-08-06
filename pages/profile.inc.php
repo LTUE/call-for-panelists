@@ -373,10 +373,10 @@ function readingValue() {
     </div>
 <?php } ?>
 
-<?php $year = 2020; /* TODO: auto-calculate */ ?>
+<?php $year = 2021; /* TODO: auto-calculate */ ?>
 <p>Welcome to the <?= $year; ?> LTUE Call for Panelists! Please sign up for panels for which you are interested and qualified. Please note that expressing interest will not automatically put you on a panel. As we create our schedule, we will notify you if/when you have been selected for a panel.</p>
 <p><strong>This Call for Panelists will close on September 1<sup>st</sup>.</strong> We will begin contacting those who have been selected for panels in November.</p>
-<p>LTUE is Thurday Feb. 13<sup>th</sup> to Saturday Feb. 15<sup>th</sup>, 2020.</p>
+<p>LTUE is Thurday Feb. 11<sup>th</sup> to Saturday Feb. 13<sup>th</sup>, 2021.</p>
 <p><strong>You must click Update Profile</strong> in order to save this form.</p>
 <form method="POST" enctype="multipart/form-data">
 <?php if (!empty($error)): ?>
