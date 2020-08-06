@@ -36,7 +36,6 @@ if (!empty($panelist)) {
 }
 
 $myBooks = [];
-$mySuggestions = [];
 $myAvailability = [];
 if ($panelist) {
     $getMyBooks = $db->prepare(
@@ -46,15 +45,6 @@ if ($panelist) {
     foreach ($getMyBooks->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $myBooks[$row['position']] = $row;
     }
-
-    $getMySuggestions = $db->prepare(
-        'SELECT position, title, description, pitch FROM panelist_suggestions WHERE panelist_id = :id'
-    );
-    $getMySuggestions->execute(array(':id' => $panelist['id']));
-    foreach ($getMySuggestions->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $mySuggestions[$row['position']] = $row;
-    }
-
 
     $getMyAvailability = $db->prepare('SELECT * FROM panelist_availability WHERE panelist_id = :id');
     $getMyAvailability->execute(array(':id' => $panelist['id']));
@@ -87,17 +77,6 @@ function handleForm() {
             return 'Validation failed - no book author may exceed 50 characters';
         if (!empty($data['isbn']) && strlen($data['isbn']) > 50)
             return 'Validation failed - no book ISBN may exceed 20 characters';
-    }
-    for ($i = 1; $i <= 3; $i++) {
-        if (empty($_POST['suggestions'][$i]))
-            continue;
-        $data = $_POST['suggestions'][$i];
-        if (!empty($data['title']) && strlen($data['title']) > 50)
-            return 'Validation failed - no presentation/workshop title may exceed 50 characters';
-        if (!empty($data['description']) && strlen($data['description']) > 50)
-            return 'Validation failed - no presentation/workshop description may exceed 50 characters';
-        if (!empty($data['pitch']) && strlen($data['pitch']) > 500)
-            return 'Validation failed - no presentation/workshop pitch may exceed 500 characters';
     }
 
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
@@ -233,7 +212,7 @@ function handleForm() {
     }
 
 
-    // TODO: slightly less lazy both books and suggestions
+    // TODO: slightly less lazy books
     // TODO: field limits!
 
     $removeBooks = $db->prepare('DELETE FROM books_to_stock WHERE panelist_id = :id');
@@ -260,32 +239,6 @@ function handleForm() {
             return 'Failed to save book suggestions - please try again or contact support';
         }
     }
-
-    $removeSuggestions = $db->prepare('DELETE FROM panelist_suggestions WHERE panelist_id = :id');
-    $removeSuggestions->execute(array(':id' => $panelist['id']));
-    $suggestions = [];
-    for ($i = 1; $i <= 3; $i++) {
-        if (empty($_POST['suggestions'][$i]))
-            continue;
-        $data = $_POST['suggestions'][$i];
-        if (empty($data['title']) && empty($data['description']) && empty($data['pitch']))
-            continue;
-        array_push(
-            $suggestions, $panelist['id'], $i,
-            $data['title'] ?? '', $data['description'] ?? '', $data['pitch'] ?? ''
-        );
-    }
-    if (count($suggestions)) {
-        $addSuggestions = $db->prepare(
-            'INSERT INTO panelist_suggestions (panelist_id, position, title, description, pitch) VALUES ' .
-            implode(', ', array_fill(0, count($suggestions) / 5, '(?, ?, ?, ?, ?)'))
-        );
-        $addSuggestions->execute($suggestions);
-        if ($addSuggestions->rowCount() !== (count($suggestions) / 5)) {
-            return 'Failed to save presentations/workshops - please try again or contact support';
-        }
-    }
-
 
     // TODO: bad architecture; should do something w/time ranges instead.
     // TODO: remove interested panels when changing availability!
@@ -336,13 +289,6 @@ function bookValue($id, $field) {
     if (empty($_POST) && !empty($myBooks[$id]))
         return htmlspecialchars($myBooks[$id][$field], ENT_QUOTES);
 }
-function suggestionValue($id, $field) {
-    global $mySuggestions;
-    if (!empty($_POST['suggestions']) && !empty($_POST['suggestions'][$id]) && !empty($_POST['suggestions'][$id][$field]))
-        return htmlspecialchars($_POST['suggestions'][$id][$field], ENT_QUOTES);
-    if (empty($_POST) && !empty($mySuggestions[$id]))
-        return htmlspecialchars($mySuggestions[$id][$field], ENT_QUOTES);
-}
 function availabilityValue($day, $part) {
     global $myAvailability;
     return !empty($_POST['available'][$day][$part]) || (
@@ -375,6 +321,7 @@ function readingValue() {
 
 <?php $year = 2021; /* TODO: auto-calculate */ ?>
 <p>Welcome to the <?= $year; ?> LTUE Call for Panelists! Please sign up for panels for which you are interested and qualified. Please note that expressing interest will not automatically put you on a panel. As we create our schedule, we will notify you if/when you have been selected for a panel.</p>
+<p>We highly recommend submitting a presentation/workshop this year. That is available on a separate form here: <a href="https://forms.gle/nVAoC5ExYguXnC2d8">https://forms.gle/nVAoC5ExYguXnC2d8</a>.</p>
 <p><strong>This Call for Panelists will close on September 1<sup>st</sup>.</strong> We will begin contacting those who have been selected for panels in November.</p>
 <p>LTUE is Thurday Feb. 11<sup>th</sup> to Saturday Feb. 13<sup>th</sup>, 2021.</p>
 <p><strong>You must click Update Profile</strong> in order to save this form.</p>
@@ -459,25 +406,6 @@ function readingValue() {
     <label class="required">Is it okay if LTUE shares your email with other panelists/moderators who are assigned to the same panels as you?</label>
     <?php booleanForm('share_email'); ?>
     <p class="explanation wide"> Sharing your email will allow the moderator to contact you and coordinate seed questions. <strong>Note:</strong> LTUE has a strict confidentiality policy, and will never share your email address without your express permission.</p>
-
-    <!-- TODO: presentation - 3 again -->
-    <p>Do you have a presentation or a workshop that you would like to run? If so, please give us a title, description, and a pitch for the programming. We will contact you with possible time slots in November, if your presentation is selected.</p>
-    <table>
-        <tr>
-            <th></th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Pitch</th>
-        </tr>
-        <?php for ($i = 1; $i <= 3; $i++): ?>
-        <tr>
-            <th><?= $i ?>.</th>
-            <td><input type="text" name="suggestions[<?= $i ?>][title]" maxlength=50 value="<?= suggestionValue($i, 'title') ?>" /></td>
-            <td><input type="text" name="suggestions[<?= $i ?>][description]" maxlength=50 value="<?= suggestionValue($i, 'description') ?>" /></td>
-            <td><input type="text" name="suggestions[<?= $i ?>][pitch]" maxlength=500 value="<?= suggestionValue($i, 'pitch') ?>" /></td>
-        </tr>
-        <?php endfor; ?>
-    </table>
 
     <!-- TODO: available hours… -->
     <p class="required">Which times will you be available and would like to see programming for?</p>

@@ -199,6 +199,7 @@ CREATE TABLE IF NOT EXISTS books_to_stock (
     CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
     PRIMARY KEY (panelist_id, position)
 );
+/*
 CREATE TABLE IF NOT EXISTS panelist_suggestions (
     panelist_id INT UNSIGNED NOT NULL,
     position TINYINT UNSIGNED NOT NULL,
@@ -209,6 +210,7 @@ CREATE TABLE IF NOT EXISTS panelist_suggestions (
     CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
     PRIMARY KEY (panelist_id, position)
 );
+*/
 
 /* TODO: this is not good - only virtue is that I put in minimal thought */
 CREATE TABLE IF NOT EXISTS panelist_availability (
