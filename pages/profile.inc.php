@@ -24,16 +24,69 @@ if (!empty($_SESSION['panelist_id'])) {
     }
 }
 
-$topics = array_column($db->query(
-    'SELECT id, name FROM topics ORDER BY name ASC'
-)->fetchAll(PDO::FETCH_ASSOC), 'name', 'id');
+function loadHABTM($table, $key, $value, $order, $join_key) {
+    global $db, $panelist;
+    $data = array_column($db->query(
+        "SELECT $key, $value FROM $table ORDER BY $order"
+    )->fetchAll(PDO::FETCH_ASSOC), $value, $key);
 
-$myTopics = array();
-if (!empty($panelist)) {
-    $myTopicsQuery = $db->prepare('SELECT topic_id FROM panelists_topics WHERE panelist_id = :id');
-    $myTopicsQuery->execute(array(':id' => $panelist['id']));
-    $myTopics = $myTopicsQuery->fetchAll(PDO::FETCH_COLUMN);
+    $myData = array();
+    if (!empty($panelist)) {
+        $myDataQuery = $db->prepare("SELECT $join_key FROM panelists_$table WHERE panelist_id = :id");
+        $myDataQuery->execute(array(':id' => $panelist['id']));
+        $myData = $myDataQuery->fetchAll(PDO::FETCH_COLUMN);
+    }
+    return array('data' => $data, 'mine' => $myData);
 }
+function saveHABTM($data, $field, $join_key) {
+    global $db, $panelist;
+
+    // start with the prior list, remove from remove list as found
+    $removed = $data['mine'];
+    $added = array();
+
+    foreach (array_keys($_POST[$field]) as $id) {
+        if (!array_key_exists($id, $data['data']))
+            continue;
+
+        $index = array_search($id, $removed);
+        if (false !== $index) {
+            array_splice($removed, $index, 1); // nope, not removed
+        } else {
+            array_push($added, $panelist['id'], $id);
+        }
+    }
+
+    if (count($added)) {
+        $addTopicsQuery = "INSERT INTO panelists_$field (panelist_id, $join_key) VALUES";
+        $addTopicsQuery .= implode(', ', array_fill(0, count($added) / 2, '(?, ?)'));
+        $addTopics = $db->prepare($addTopicsQuery);
+        $addTopics->execute($added);
+
+        if ($addTopics->rowCount() !== (count($added) / 2))
+            return "We failed to save your $field. I don't know why. Try again?";
+    }
+
+    // we don't need to delete where nothing matches, if we set up the ON
+    // DELETE CASCADE in the database correctly
+    if (count($removed)) {
+        $removeTopics = $db->prepare("DELETE FROM panelists_$field WHERE panelist_id = ? AND $join_key IN (" .
+            implode(', ', array_fill(0, count($removed), '?')) .
+        ')');
+        $removeTopics->execute(array_merge([$panelist['id']], $removed));
+        if ($removeTopics->rowCount() !== count($removed))
+            return "Something went wrong updating your $field. Try again?";
+    }
+
+    return;
+}
+
+$ethnicities = loadHABTM('ethnicities', 'id', 'label', 'id', 'ethnicity_id');
+$genders = loadHABTM('genders', 'id', 'label', 'id', 'gender_id');
+$sexualities = loadHABTM('sexualities', 'id', 'label', 'id', 'sexuality_id');
+$religions = loadHABTM('religions', 'id', 'name', 'id', 'religion_id');
+$topics = loadHABTM('topics', 'id', 'name', 'name', 'topic_id');
+
 
 $myBooks = [];
 $myAvailability = [];
@@ -52,11 +105,11 @@ if ($panelist) {
 }
 
 function handleForm() {
-    global $db, $panelist, $topics;
+    global $db, $panelist;
 
     if (!empty($_POST['biography']) && strlen($_POST['biography']) > 500)
         return 'Your biography is too long. Please reduce it.';
-    if (!empty($_POST['topic']) && !is_array($_POST['topic']))
+    if (!empty($_POST['topics']) && !is_array($_POST['topics']))
         return 'Your data is somehow corrupted - please contact us and show us what you did so we can fix it.';
 
     if (!empty($_POST['reading']) && $_POST['reading'] === 'yes' && empty($_POST['reading_topic']))
@@ -81,12 +134,12 @@ function handleForm() {
 
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
         !empty($_POST['contact_email']) && !empty($_POST['biography']) &&
-        !empty($_POST['topic']) && !empty($_POST['available']) &&
+        !empty($_POST['topics']) && !empty($_POST['available']) &&
         !empty($_POST['signing']) && !empty($_POST['moderator']) &&
         !empty($_POST['recording']) && !empty($_POST['share_email']);
     if (!$sufficientData) {
         // client-side validation should catch most missing fields, so simple check and fail
-        if (empty($_POST['topic']))
+        if (empty($_POST['topics']))
             return 'You must select at least one interesting type of panel';
         else if (empty($_POST['available']))
             return 'You must select at least one availability group';
@@ -94,13 +147,30 @@ function handleForm() {
             return 'Please complete all required sections of the form, marked with a *';
     }
 
+    // optional field - sanitize
+    if (isset($_POST['disability'])) {
+        var_dump($_POST['disability']);
+        switch ($_POST['disability']) {
+        case 'yes':
+            $_POST['disability'] = true;
+            break;
+        case 'no':
+            $_POST['disability'] = false;
+            break;
+        default:
+            $_POST['disability'] = null;
+            break;
+        }
+    }
+
     // Validation done - good to save
 
     $profileSet = '
         name = :name, badge_name = :badge_name, contact_email = :contact_email,
+        biography = :biography, info = :info,
         website = :website, facebook = :facebook, twitter = :twitter,
         instagram = :instagram, other_social = :other_social,
-        biography = :biography, info = :info,
+        disability = :disability,
         signing = :signing, reading = :reading, moderator = :moderator,
         recording = :recording, share_email = :share_email
     ';
@@ -116,6 +186,8 @@ function handleForm() {
         ':twitter' => $_POST['twitter'] ?? '',
         ':instagram' => $_POST['instagram'] ?? '',
         ':other_social' => $_POST['other_social'] ?? '',
+
+        ':disability' => $_POST['disability'] ?? null,
 
         ':signing' => $_POST['signing'] === 'yes',
         ':reading' => $_POST['reading_topic'],
@@ -184,39 +256,22 @@ function handleForm() {
         $panelist['photo_file'] = $photoFile;
     }
 
-    global $myTopics;
-    $removedTopics = $myTopics;
-    $addedTopics = array();
-    foreach (array_keys($_POST['topic']) as $id) {
-        if (!array_key_exists($id, $topics))
-            continue;
-
-        $index = array_search($id, $removedTopics);
-        if (false !== $index) {
-            array_splice($removedTopics, $index, 1);
-        } else {
-            array_push($addedTopics, $panelist['id'], $id);
-        }
-    }
-    if (count($addedTopics)) {
-        $addTopicsQuery = 'INSERT INTO panelists_topics (panelist_id, topic_id) VALUES';
-        $addTopicsQuery .= implode(', ', array_fill(0, count($addedTopics) / 2, '(?, ?)'));
-        $addTopics = $db->prepare($addTopicsQuery);
-        $addTopics->execute($addedTopics);
-
-        if ($addTopics->rowCount() !== (count($addedTopics) / 2))
-            return 'We failed to save your topics. I don\'t know why. Try again?';
-    }
-    if (count($removedTopics)) {
-        $removeTopics = $db->prepare('DELETE FROM panelists_topics WHERE panelist_id = ? AND topic_id IN (' .
-            implode(', ', array_fill(0, count($removedTopics), '?')) .
-        ')');
-        $removeTopics->execute(array_merge([$panelist['id']], $removedTopics));
-        if ($removeTopics->rowCount() !== count($removedTopics))
-            return 'Something went wrong updating your topics. Try again?';
-
-        // TODO delete where _no_ tags now match
-    }
+    global $ethnicities, $genders, $sexualities, $religions, $topics;
+    $error = saveHABTM($ethnicities, 'ethnicities', 'ethnicity_id');
+    if ($error)
+        return $error;
+    $error = saveHABTM($genders, 'genders', 'gender_id');
+    if ($error)
+        return $error;
+    $error = saveHABTM($sexualities, 'sexualities', 'sexuality_id');
+    if ($error)
+        return $error;
+    $error = saveHABTM($religions, 'religions', 'religion_id');
+    if ($error)
+        return $error;
+    $error = saveHABTM($topics, 'topics', 'topic_id');
+    if ($error)
+        return $error;
 
 
     // TODO: slightly less lazy books
@@ -285,9 +340,17 @@ function value($key) {
     global $panelist;
     return htmlspecialchars($_POST[$key] ?? $panelist[$key] ?? '', ENT_QUOTES);
 }
-function topicValue($id) {
-    global $myTopics;
-    return !empty($_POST['topic'][$id]) || in_array($id, $myTopics);
+function habtmChecklist($data, $field) {
+    ob_start();
+    foreach ($data['data'] as $id => $name):
+        $checked = !empty($_POST[$field][$id]) || in_array($id, $data['mine']);
+?>
+    <div class="shrinkwrap">
+        <input type="checkbox" id="<?= $field ?>-<?= $id ?>" name="<?= $field ?>[<?= $id ?>]"<?= $checked ? ' checked' : '' ?>>
+        <label for="<?= $field ?>-<?= $id ?>"><?= htmlspecialchars($name, ENT_QUOTES) ?></label>
+    </div>
+    <?php endforeach;
+    return ob_get_clean();
 }
 function bookValue($id, $field) {
     global $myBooks;
@@ -310,12 +373,20 @@ function valueIs($key, $check) {
         return $panelist[$key] === ($check ? '1' : '0');
     return false;
 }
+function valueIsNull($key) {
+    global $panelist;
+    if (!empty($_POST[$key]))
+        return $_POST[$key] === null;
+    if (!empty($panelist))
+        return $panelist[$key] === null;
+    return false;
+}
 function readingValue() {
     global $panelist;
     return $_POST['reading_topic'] ?? $panelist['reading'] ?? '';
 }
-?>
-<?php function booleanForm($name, $required = true) { ?>
+function booleanForm($name, $required = true) {
+    ob_start(); ?>
     <div class="shrinkwrap">
         <input type="radio" id="<?= $name ?>-yes" name="<?= $name ?>" value="yes"<?= $required ? ' required' : '' ?><?= valueIs($name, true) ? ' checked' : '' ?>>
         <label for="<?= $name ?>-yes">Yes</label>
@@ -324,7 +395,10 @@ function readingValue() {
         <input type="radio" id="<?= $name ?>-no" name="<?= $name ?>" value="no"<?= $required ? ' required' : '' ?><?= valueIs($name, false) ? ' checked' : '' ?>>
         <label for="<?= $name ?>-no">No</label>
     </div>
-<?php } ?>
+<?php
+    return ob_get_clean();
+}
+?>
 
 <?php $year = 2021; /* TODO: auto-calculate */ ?>
 <p>Welcome to the <?= $year; ?> LTUE Call for Panelists! Please sign up for panels for which you are interested and qualified. Please note that expressing interest will not automatically put you on a panel. As we create our schedule, we will notify you if/when you have been selected for a panel.</p>
@@ -382,11 +456,35 @@ function readingValue() {
         </div>
     </section>
 
+    <section id="demographics">
+        <h2>Demographics<a href="#demographics">#</a></h2>
+        <p>LTUE remains committed to diversity in our panels and presentations. We intend to use this data to craft a diversity index for each panel. This information will not be used to determine suitability for a panel &mdash; it will only be used afterwards to select among equally suitable candidates to enhance diversity. All fields are optional.</p>
+
+        <label>What is your ethnicity? (Check all that apply)</label>
+        <?= habtmChecklist($ethnicities, 'ethnicities') ?>
+
+        <label>What is your gender identity?</label>
+        <?= habtmChecklist($genders, 'genders') ?>
+
+        <label>Do you identify as any of the following?</label>
+        <?= habtmChecklist($sexualities, 'sexualities') ?>
+
+        <label>Do you identify as someone disabled or differently abled, either mentally or physically?</label>
+        <?= booleanForm('disability', false) ?>
+        <div class="shrinkwrap">
+            <input type="radio" id="disability-null" name="disability" value="null"<?= valueIsNull('disability') ? ' checked' : '' ?>>
+            <label for="disability-null">Prefer not to say</label>
+        </div>
+
+        <label>Do you have any of the following religious affiliations?</label>
+        <?= habtmChecklist($religions, 'religions') ?>
+    </section>
+
     <section id="photo">
         <!-- TODO: preview or iframe, as in Mike's example -->
         <input type="hidden" name="MAX_FILE_SIZE" value="<?= MAX_UPLOAD_SIZE ?>" />
         <label for="picture">Profile Photo</label>
-        <?php if ($panelist['photo_file']): ?>
+        <?php if ($panelist && $panelist['photo_file']): ?>
         <figure id="current-picture">
             <img src="/uploads/<?= $panelist['photo_file'] ?>" />
             <figcaption>Our current photo of you.</figcaption>
@@ -416,7 +514,7 @@ function readingValue() {
         </table>
 
         <label class="required">Are you interested in participating in the LTUE Mass Signing on Friday February 12<sup>th</sup> from 6:30 pm to 8:00 pm?</label>
-        <?php booleanForm('signing'); ?>
+        <?= booleanForm('signing') ?>
     </section>
 
     <section id="reading">
@@ -437,10 +535,10 @@ function readingValue() {
 
     <section id="privacy">
         <label class="required">Is it okay if LTUE records your panels/presentations during the event?</label>
-        <?php booleanForm('recording'); ?>
+        <?= booleanForm('recording') ?>
 
         <label class="required">Is it okay if LTUE shares your email with other panelists/moderators who are assigned to the same panels as you?</label>
-        <?php booleanForm('share_email'); ?>
+        <?= booleanForm('share_email') ?>
         <p class="explanation wide"> Sharing your email will allow the moderator to contact you and coordinate seed questions. <strong>Note:</strong> LTUE has a strict confidentiality policy, and will never share your email address without your express permission.</p>
     </section>
 
@@ -455,7 +553,7 @@ function readingValue() {
             <li>Keeping the panel interesting and on-topic</li>
         </ol>
         <label class="required">Are you interested in being a Moderator?</label>
-        <?php booleanForm('moderator'); ?>
+        <?= booleanForm('moderator') ?>
     </section>
 
     <section id="availability">
@@ -493,12 +591,7 @@ function readingValue() {
     <section id="interests">
         <h2>Panel Category Interest<a href="#interests">#</a></h2>
         <label class="long required">Which types of panels are you interested in? (mark all that apply) We will only show panels related to your selections and time frame in the next section</label>
-        <?php foreach ($topics as $id => $name): ?>
-        <div class="shrinkwrap">
-            <input type="checkbox" id="topic-<?= $id ?>" name="topic[<?= $id ?>]"<?= topicValue($id) ? ' checked' : '' ?>>
-            <label for="topic-<?= $id ?>"><?= htmlspecialchars($name, ENT_QUOTES) ?></label>
-        </div>
-        <?php endforeach; ?>
+        <?= habtmChecklist($topics, 'topics') ?>
     </section>
 
     <input type="submit" value="Update Profile">
