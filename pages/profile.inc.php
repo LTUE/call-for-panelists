@@ -97,7 +97,9 @@ function handleForm() {
     // Validation done - good to save
 
     $profileSet = '
-        name = :name, badge_name = :badge_name, contact_email = :contact_email, website = :website,
+        name = :name, badge_name = :badge_name, contact_email = :contact_email,
+        website = :website, facebook = :facebook, twitter = :twitter,
+        instagram = :instagram, other_social = :other_social,
         biography = :biography, info = :info,
         signing = :signing, reading = :reading, moderator = :moderator,
         recording = :recording, share_email = :share_email
@@ -106,9 +108,14 @@ function handleForm() {
         ':name' => $_POST['name'],
         ':badge_name' => $_POST['badge_name'],
         ':contact_email' => $_POST['contact_email'],
-        ':website' => $_POST['website'] ?? '',
         ':biography' => $_POST['biography'],
         ':info' => $_POST['info'] ?? '',
+
+        ':website' => $_POST['website'] ?? '',
+        ':facebook' => $_POST['facebook'] ?? '',
+        ':twitter' => $_POST['twitter'] ?? '',
+        ':instagram' => $_POST['instagram'] ?? '',
+        ':other_social' => $_POST['other_social'] ?? '',
 
         ':signing' => $_POST['signing'] === 'yes',
         ':reading' => $_POST['reading_topic'],
@@ -325,124 +332,174 @@ function readingValue() {
 <p><strong>This Call for Panelists will close on September 1<sup>st</sup>.</strong> We will begin contacting those who have been selected for panels in November.</p>
 <p>LTUE is Thurday Feb. 11<sup>th</sup> to Saturday Feb. 13<sup>th</sup>, 2021.</p>
 <p><strong>You must click Update Profile</strong> in order to save this form.</p>
-<form method="POST" enctype="multipart/form-data">
+<form id="profile" method="POST" enctype="multipart/form-data">
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
-    <label class="required" for="name">What is your name?</label>
-    <input type="text" id="name" name="name" required value="<?= value('name') ?>">
+    <section id="personal-info">
+        <h2>Personal Info<a href="#personal-info">#</a></h2>
+        <label class="required" for="name">What is your name?</label>
+        <input type="text" id="name" name="name" required value="<?= value('name') ?>">
 
-    <label class="required" for="badge_name">Badge Name</label>
-    <input type=text" id="badge_name" name="badge_name" required value="<?= value('badge_name') ?>">
-    <p class="explanation">Name as you would like it to appear on badge and table tent (Pen Name)</p>
+        <label class="required" for="badge_name">Badge Name</label>
+        <input type=text" id="badge_name" name="badge_name" required value="<?= value('badge_name') ?>">
+        <p class="explanation">Name as you would like it to appear on badge and table tent (Pen Name)</p>
 
-    <label class="required" for="contact_email">Contact Email:</label>
-    <input type="email" id="contact_email" name="contact_email" required value="<?= value('contact_email') ?: ($account['email'] ?? '') ?>">
-    <p class="explanation">You will be notified if you are accepted as a panelist/presenter through this email.</p>
+        <label class="required" for="contact_email">Contact Email:</label>
+        <input type="email" id="contact_email" name="contact_email" required value="<?= value('contact_email') ?: ($account['email'] ?? '') ?>">
+        <p class="explanation">You will be notified if you are accepted as a panelist/presenter through this email.</p>
 
-    <label for="website">Website</label>
-    <input type="url" id="website" name="website" value="<?= value('website') ?>">
+        <label class="required" for="biography">Short bio</label>
+        <textarea id="biography" name="biography" required maxlength=500><?= value('biography') ?></textarea>
+        <p class="explanation">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come hear you speak.</p>
 
-    <label class="required" for="biography">Short bio</label>
-    <textarea id="biography" name="biography" required maxlength=500><?= value('biography') ?></textarea>
-    <p class="explanation">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come hear you speak.</p>
+        <label class="long" for="info">Additional info</label>
+        <textarea id="info" name="info"><?= value('info') ?></textarea>
+        <p class="explanation">Please provide any additional information that can help us understand your qualifications, the type of work you do, your unique circumstances, etc.</p>
+    </section>
 
-    <label class="long" for="info">Additional info</label>
-    <textarea id="info" name="info"><?= value('info') ?></textarea>
-    <p class="explanation">Please provide any additional information that can help us understand your qualifications, the type of work you do, your unique circumstances, etc.</p>
+    <section id="social-media" class="floated">
+        <h2>Social Media<a href="#social-media">#</a></h2>
+        <div class="half-width">
+            <label for="website">Website</label>
+            <input type="url" id="website" name="website" value="<?= value('website') ?>">
+        </div>
+        <div class="half-width">
+            <label for="facebook">Facebook</label>
+            <input type="url" id="facebook" name="facebook" value="<?= value('facebook') ?>">
+        </div>
+        <div class="half-width">
+            <label for="twitter">Twitter</label>
+            <input type="url" id="twitter" name="twitter" value="<?= value('twitter') ?>">
+        </div>
+        <div class="half-width">
+            <label for="instagram">Instagram</label>
+            <input type="url" id="instagram" name="instagram" value="<?= value('instagram') ?>">
+        </div>
+        <div class="half-width">
+            <label for="other_social">Other Social Media</label>
+            <input type="url" id="other_social" name="other_social" value="<?= value('other_social') ?>">
+        </div>
+    </section>
 
-    <!-- TODO: preview or iframe, as in Mike's example -->
-    <input type="hidden" name="MAX_FILE_SIZE" value="<?= MAX_UPLOAD_SIZE ?>" />
-    <label for="picture">Profile Photo</label>
-    <?php if ($panelist['photo_file']): ?>
-    <figure id="current-picture">
-        <img src="/uploads/<?= $panelist['photo_file'] ?>" />
-        <figcaption>Our current photo of you.</figcaption>
-    </figure>
-    <?php endif; ?>
-    <input type="file" name="picture" id="picture">
-    <p class="explanation">We would like to use your head shot in promotions and social media. Please upload your photo here. This should be a professional style photo that shows your face clearly and has a unobtrusive background.</p>
+    <section id="photo">
+        <!-- TODO: preview or iframe, as in Mike's example -->
+        <input type="hidden" name="MAX_FILE_SIZE" value="<?= MAX_UPLOAD_SIZE ?>" />
+        <label for="picture">Profile Photo</label>
+        <?php if ($panelist['photo_file']): ?>
+        <figure id="current-picture">
+            <img src="/uploads/<?= $panelist['photo_file'] ?>" />
+            <figcaption>Our current photo of you.</figcaption>
+        </figure>
+        <?php endif; ?>
+        <input type="file" name="picture" id="picture">
+        <p class="explanation">We would like to use your head shot in promotions and social media. Please upload your photo here. This should be a professional style photo that shows your face clearly and has a unobtrusive background.</p>
+    </section>
 
-    <p>If you would like one of LTUE's book partners to carry your books on consignment or through traditional sale (note: <span title="our sellers can only carry so many books">3 title limit</span>), please enter the information below.</p>
-    <table>
-        <tr>
-            <th></th>
-            <th>Title</th>
-            <th>Author (on cover)</th>
-            <th>ISBN</th>
-        </tr>
-        <?php for ($i = 1; $i <= 3; $i++): ?>
-        <tr>
-            <th><?= $i ?>.</th>
-            <td><input type="text" name="books[<?= $i ?>][title]" maxlength=50 value="<?= bookValue($i, 'title') ?>" /></td>
-            <td><input type="text" name="books[<?= $i ?>][author]" maxlength=50 value="<?= bookValue($i, 'author') ?>" /></td>
-            <td><input type="text" name="books[<?= $i ?>][isbn]" maxlength=20 value="<?= bookValue($i, 'isbn') ?>" /></td>
-        </tr>
-        <?php endfor; ?>
-    </table>
+    <section id="books">
+        <p>If you would like one of LTUE's book partners to carry your books on consignment or through traditional sale (note: <span title="our sellers can only carry so many books">3 title limit</span>), please enter the information below.</p>
+        <table>
+            <tr>
+                <th></th>
+                <th>Title</th>
+                <th>Author (on cover)</th>
+                <th>ISBN</th>
+            </tr>
+            <?php for ($i = 1; $i <= 3; $i++): ?>
+            <tr>
+                <th><?= $i ?>.</th>
+                <td><input type="text" name="books[<?= $i ?>][title]" maxlength=50 value="<?= bookValue($i, 'title') ?>" /></td>
+                <td><input type="text" name="books[<?= $i ?>][author]" maxlength=50 value="<?= bookValue($i, 'author') ?>" /></td>
+                <td><input type="text" name="books[<?= $i ?>][isbn]" maxlength=20 value="<?= bookValue($i, 'isbn') ?>" /></td>
+            </tr>
+            <?php endfor; ?>
+        </table>
 
-    <label class="required">Are you interested in participating in the LTUE Mass Signing on Friday February 14<sup>th</sup> from 6:30 pm to 8:00 pm?</label>
-    <?php booleanForm('signing'); ?>
+        <label class="required">Are you interested in participating in the LTUE Mass Signing on Friday February 12<sup>th</sup> from 6:30 pm to 8:00 pm?</label>
+        <?php booleanForm('signing'); ?>
+    </section>
 
-    <label>Would you be interested in doing a reading of one of your books?</label>
-    <div class="shrinkwrap">
-        <input type="radio" id="reading-yes" name="reading" value="yes"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'yes' : !!readingValue()) ? ' checked' : '' ?>>
-        <label for="reading-yes">Yes</label>
+    <section id="reading">
+        <label>Would you be interested in doing a reading of one of your books?</label>
+        <div class="shrinkwrap">
+            <input type="radio" id="reading-yes" name="reading" value="yes"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'yes' : !!readingValue()) ? ' checked' : '' ?>>
+            <label for="reading-yes">Yes</label>
 
-        <label for="reading-topic" class="required">Which book, style, or genera?</label>
-        <input id="reading-topic" name="reading_topic" maxlength=100 value="<?= readingValue() ?>" />
-    </div>
-    <div class="shrinkwrap">
-        <input type="radio" id="reading-no" name="reading" value="no"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'no' : !readingValue() && !empty($panelist)) ? ' checked' : '' ?>>
-        <label for="reading-no">No</label>
-    </div>
+            <p class="explanation wide">During a reading, you will be performing one of your own works. You will be paired with another author also reading their work. Note that being given time to perform a reading is by invitation only.</p>
+            <label for="reading-topic" class="required">What book/genre/style would you like to highlight?</LABel>
+            <input id="reading-topic" name="reading_topic" maxlength=100 value="<?= readingValue() ?>" />
+        </div>
+        <div class="shrinkwrap">
+            <input type="radio" id="reading-no" name="reading" value="no"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'no' : !readingValue() && !empty($panelist)) ? ' checked' : '' ?>>
+            <label for="reading-no">No</label>
+        </div>
+    </section>
 
-    <label class="required">Are you willing to be a moderator?</label>
-    <?php booleanForm('moderator'); ?>
+    <section id="privacy">
+        <label class="required">Is it okay if LTUE records your panels/presentations during the event?</label>
+        <?php booleanForm('recording'); ?>
 
-    <label class="required">Is it okay if LTUE records your panels/presentations during the event?</label>
-    <?php booleanForm('recording'); ?>
+        <label class="required">Is it okay if LTUE shares your email with other panelists/moderators who are assigned to the same panels as you?</label>
+        <?php booleanForm('share_email'); ?>
+        <p class="explanation wide"> Sharing your email will allow the moderator to contact you and coordinate seed questions. <strong>Note:</strong> LTUE has a strict confidentiality policy, and will never share your email address without your express permission.</p>
+    </section>
 
-    <label class="required">Is it okay if LTUE shares your email with other panelists/moderators who are assigned to the same panels as you?</label>
-    <?php booleanForm('share_email'); ?>
-    <p class="explanation wide"> Sharing your email will allow the moderator to contact you and coordinate seed questions. <strong>Note:</strong> LTUE has a strict confidentiality policy, and will never share your email address without your express permission.</p>
+    <section id="moderator">
+        <h2>Moderator Interest<a href="#moderator">#</a></h2>
+        <p class="label">If you are interested in being a moderator, please review the <a href="https://drive.google.com/file/d/1IPo7povWSiXCtzFIY6kGhIvDmrpHVVt9/view">moderator tips document</a>, you will be expected to attend a moderator training and follow those guidelines, which include:</p>
+        <ol class="explanation">
+            <li>Starting and ending the panel on time</li>
+            <li>Proper Panel Preparation</li>
+            <li>Asking open ended questions</li>
+            <li>Ensuring that all panelists are given equal opportunity to speak</li>
+            <li>Keeping the panel interesting and on-topic</li>
+        </ol>
+        <label class="required">Are you interested in being a Moderator?</label>
+        <?php booleanForm('moderator'); ?>
+    </section>
 
-    <!-- TODO: available hours… -->
-    <p class="required">Which times will you be available and would like to see programming for?</p>
-    <table class="availability">
-        <tr>
-            <th></th>
-            <th>9 am - 11:45 am</th>
-            <th>noon - 3:45 pm</th>
-            <th>4:00 pm - end of day</th>
-        </tr>
-        <tr>
-            <th>Thursday Feb. 13, 2020</th>
-            <td><label><input type="checkbox" name="available[thu][morn]" <?= availabilityValue('thu', 'morn') ? 'checked ' : '' ?>/></label></td>
-            <td><label><input type="checkbox" name="available[thu][day]" <?= availabilityValue('thu', 'day') ? 'checked ' : '' ?>/></label></td>
-            <td><label><input type="checkbox" name="available[thu][even]" <?= availabilityValue('thu', 'even') ? 'checked ' : '' ?>/></label></td>
-        </tr>
-        <tr>
-            <th>Friday Feb. 14, 2020</th>
-            <td><label><input type="checkbox" name="available[fri][morn]"<?= availabilityValue('fri', 'morn') ? 'checked ' : '' ?>/></label></td>
-            <td><label><input type="checkbox" name="available[fri][day]"<?= availabilityValue('fri', 'day') ? 'checked ' : '' ?>/></label></td>
-            <td><label><input type="checkbox" name="available[fri][even]"<?= availabilityValue('fri', 'even') ? 'checked ' : '' ?>/></label></td>
-        </tr>
-        <tr>
-            <th>Saturday Feb. 15, 2020</th>
-            <td><label><input type="checkbox" name="available[sat][morn]"<?= availabilityValue('sat', 'morn') ? 'checked ' : '' ?>/></label></td>
-            <td><label><input type="checkbox" name="available[sat][day]"<?= availabilityValue('sat', 'day') ? 'checked ' : '' ?>/></label></td>
-            <td><label><input type="checkbox" name="available[sat][even]"<?= availabilityValue('sat', 'even') ? 'checked ' : '' ?>/></label></td>
-        </tr>
-    </table>
+    <section id="availability">
+        <h2>Timeframe Availability<a href="#availability">#</a></h2>
+        <!-- TODO: available hours… -->
+        <p class="required">Which times will you be available and would like to see programming for?</p>
+        <table class="availability">
+            <tr>
+                <th></th>
+                <th>9 am - 11:45 am</th>
+                <th>noon - 3:45 pm</th>
+                <th>4:00 pm - end of day</th>
+            </tr>
+            <tr>
+                <th>Thursday Feb. 13, 2020</th>
+                <td><label><input type="checkbox" name="available[thu][morn]" <?= availabilityValue('thu', 'morn') ? 'checked ' : '' ?>/></label></td>
+                <td><label><input type="checkbox" name="available[thu][day]" <?= availabilityValue('thu', 'day') ? 'checked ' : '' ?>/></label></td>
+                <td><label><input type="checkbox" name="available[thu][even]" <?= availabilityValue('thu', 'even') ? 'checked ' : '' ?>/></label></td>
+            </tr>
+            <tr>
+                <th>Friday Feb. 14, 2020</th>
+                <td><label><input type="checkbox" name="available[fri][morn]"<?= availabilityValue('fri', 'morn') ? 'checked ' : '' ?>/></label></td>
+                <td><label><input type="checkbox" name="available[fri][day]"<?= availabilityValue('fri', 'day') ? 'checked ' : '' ?>/></label></td>
+                <td><label><input type="checkbox" name="available[fri][even]"<?= availabilityValue('fri', 'even') ? 'checked ' : '' ?>/></label></td>
+            </tr>
+            <tr>
+                <th>Saturday Feb. 15, 2020</th>
+                <td><label><input type="checkbox" name="available[sat][morn]"<?= availabilityValue('sat', 'morn') ? 'checked ' : '' ?>/></label></td>
+                <td><label><input type="checkbox" name="available[sat][day]"<?= availabilityValue('sat', 'day') ? 'checked ' : '' ?>/></label></td>
+                <td><label><input type="checkbox" name="available[sat][even]"<?= availabilityValue('sat', 'even') ? 'checked ' : '' ?>/></label></td>
+            </tr>
+        </table>
+    </section>
 
-    <label class="long required">Which types of panels are you interested in? (mark all that apply) We will only show panels related to your selections and time frame in the next section</label>
-    <?php foreach ($topics as $id => $name): ?>
-    <div class="shrinkwrap">
-        <input type="checkbox" id="topic-<?= $id ?>" name="topic[<?= $id ?>]"<?= topicValue($id) ? ' checked' : '' ?>>
-        <label for="topic-<?= $id ?>"><?= htmlspecialchars($name, ENT_QUOTES) ?></label>
-    </div>
-    <?php endforeach; ?>
+    <section id="interests">
+        <h2>Panel Category Interest<a href="#interests">#</a></h2>
+        <label class="long required">Which types of panels are you interested in? (mark all that apply) We will only show panels related to your selections and time frame in the next section</label>
+        <?php foreach ($topics as $id => $name): ?>
+        <div class="shrinkwrap">
+            <input type="checkbox" id="topic-<?= $id ?>" name="topic[<?= $id ?>]"<?= topicValue($id) ? ' checked' : '' ?>>
+            <label for="topic-<?= $id ?>"><?= htmlspecialchars($name, ENT_QUOTES) ?></label>
+        </div>
+        <?php endforeach; ?>
+    </section>
 
     <input type="submit" value="Update Profile">
 </form>

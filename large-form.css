@@ -26,13 +26,14 @@ nav ul li a:focus {
     color: #1593c0;
 }
 
-body.large-form h1 {
+body.large-form h1, body.large-form h2 {
     color: #4a4a4a;
     font-size: 25px;
     font-weight: 300;
 }
 
 
+/* profile */
 #current-picture {
     margin-left: 0;
 }
@@ -41,10 +42,12 @@ body.large-form h1 {
     max-height: 200px;
 }
 
+#reading-yes + label ~ p,
 #reading-yes + label ~ label,
 #reading-yes ~ input {
     display: none;
 }
+#reading-yes:checked + label ~ p,
 #reading-yes:checked + label ~ label,
 #reading-yes:checked ~ input {
     display: block;
@@ -79,7 +82,27 @@ table.availability input[type=checkbox] {
     display: inline;
 }
 
+form#profile section {
+    border-top: 1px solid #c1c1c1;
+    margin-top: 30px;
+}
+form#profile section h2 > a {
+    display: none;
+    margin-left: 0.25em;
+}
+form#profile section h2:hover > a {
+    display: inline;
+}
+section.floated {
+    overflow: hidden;
+}
+div.half-width {
+    float: left;
+    width 50%;
+}
 
+
+/* panels */
 section.panel {
     background-color: #f6f6f6;
     padding: 1em 1.5em 2em;

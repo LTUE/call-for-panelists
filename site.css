@@ -26,8 +26,9 @@ form p {
     font-size: 16px;
 }
 
-label {
+label, p.label {
     font-family: 'Rajdhani', sans-serif;
+    color: #191919;
 }
 
 body {
@@ -75,7 +76,7 @@ input, textarea, select {
     background-color: #e6f0ff;
     font-size: 14px;
 }
-p.explanation {
+ol.explanation, p.explanation {
     margin-top: 0;
     color: #4a4a4a;
     font-size: 14px;
