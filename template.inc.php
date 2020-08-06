@@ -5,6 +5,10 @@
     <title><?= !empty($title) ? $title . ' - ' : '' ?>LTUE Panelists Website</title>
     <link rel="stylesheet" href="/site.css">
     <link rel="stylesheet" href="/large-form.css">
+
+    <link rel="icon" href="https://ltue.net/wp-content/uploads/2020/01/cropped-AppLogo_512-32x32.png" sizes="32x32" />
+    <link rel="icon" href="https://ltue.net/wp-content/uploads/2020/01/cropped-AppLogo_512-192x192.png" sizes="192x192" />
+    <link rel="apple-touch-icon-precomposed" href="https://ltue.net/wp-content/uploads/2020/01/cropped-AppLogo_512-180x180.png" />
 </head>
 <body class="large-form">
 <nav>
