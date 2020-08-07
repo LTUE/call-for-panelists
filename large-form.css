@@ -15,15 +15,21 @@ nav ul li {
     float: left;
     margin-left: 1em;
 }
-nav ul li a {
+nav ul li a,
+nav ul li span.active {
     font-size: 14px;
     color: #898989;
     text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
 }
 nav ul li a:hover,
-nav ul li a:focus {
+nav ul li a:focus,
+nav ul li span.active {
     text-decoration: underline;
     color: #1593c0;
+}
+nav ul li span.active {
+    cursor: default;
 }
 
 body.large-form h1, body.large-form h2 {

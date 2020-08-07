@@ -14,8 +14,20 @@
 <nav>
     <a href="http://ltue.net"><img src="img/LTUELogo-WithText.png" alt="LTUE" /></a>
     <ul>
-        <li><a href="/profile">Profile Form</a></li>
-        <li><a href="/panels">Panel Selection</a></li>
+        <li>
+            <?php if ($_SERVER['PATH_INFO'] === '/profile'): ?>
+            <span class="active">Profile Form</span>
+            <?php else: ?>
+            <a href="/profile">Profile Form</a>
+            <?php endif; ?>
+        </li>
+        <li>
+            <?php if ($_SERVER['PATH_INFO'] === '/panels'): ?>
+            <span class="active">Panel Selection</span>
+            <?php else: ?>
+            <a href="/panels">Panel Selection</a>
+            <?php endif; ?>
+        </li>
 <?php if (!empty($_SESSION['account_id'])): ?>
         <li><a href="/logout">Log out</a></li>
 <?php else: ?>
