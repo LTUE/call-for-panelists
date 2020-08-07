@@ -33,14 +33,14 @@
     <a href="http://ltue.net"><img src="img/LTUELogo-WithText.png" alt="LTUE" /></a>
     <ul>
         <li>
-            <?php if ($_SERVER['PATH_INFO'] === '/profile'): ?>
+            <?php if ($path[1] === 'profile'): ?>
             <span class="active">Profile Form</span>
             <?php else: ?>
             <a href="/profile">Profile Form</a>
             <?php endif; ?>
         </li>
         <li>
-            <?php if ($_SERVER['PATH_INFO'] === '/panels'): ?>
+            <?php if ($path[1] === 'panels'): ?>
             <span class="active">Panel Selection</span>
             <?php else: ?>
             <a href="/panels">Panel Selection</a>
