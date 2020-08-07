@@ -99,3 +99,6 @@ CREATE TABLE IF NOT EXISTS panelists_religions (
     CONSTRAINT FOREIGN KEY (religion_id) REFERENCES religions(id) ON DELETE CASCADE,
     PRIMARY KEY (panelist_id, religion_id)
 );
+/* End of Inclusion stuff */
+
+ALTER TABLE panelists ADD registered DATETIME NOT NULL AFTER account_id;

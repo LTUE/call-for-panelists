@@ -149,7 +149,6 @@ function handleForm() {
 
     // optional field - sanitize
     if (isset($_POST['disability'])) {
-        var_dump($_POST['disability']);
         switch ($_POST['disability']) {
         case 'yes':
             $_POST['disability'] = true;
@@ -197,8 +196,9 @@ function handleForm() {
     ];
 
     if (empty($panelist)) {
-        $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, ' . $profileSet;
+        $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, registered = :registered, ' . $profileSet;
         $data[':account_id'] = $_SESSION['account_id'] ?? NULL;
+        $data[':registered'] = date('Y-m-d H:i:s');
     } else {
         $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE id = :id';
         $data[':id'] = $_SESSION['panelist_id'];
