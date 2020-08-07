@@ -425,7 +425,7 @@ function booleanForm($name, $required = true) {
 
         <label class="required" for="biography">Short bio</label>
         <textarea id="biography" name="biography" required maxlength=500><?= value('biography') ?></textarea>
-        <p class="explanation">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come hear you speak.</p>
+        <p class="explanation">We would like your biography to appear in the program book and online. Please note that we will have extremely limited space, so please keep it to 400 characters or less. This should be a business bio stating your professional credits and the reasons that an attendee would want to come hear you speak. Bios should be written in <strong>third person</strong> please, or they will be edited. Bios may also be edited for brevity. Your website will be added, so it does not need to be included here.</p>
 
         <label class="long" for="info">Additional info</label>
         <textarea id="info" name="info"><?= value('info') ?></textarea>
