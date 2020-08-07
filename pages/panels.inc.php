@@ -132,7 +132,7 @@ function prettyTime($time) {
     $hour = ltrim(explode(':', $time)[0], '0');
     return $hour . ':00 (' .
         ($hour > 12 ? $hour - 12 : $hour) . ':00 ' .
-        (($hour <= 12 && $hour != 0) ? 'am' : 'pm') .
+        (($hour < 12) ? 'am' : 'pm') .
         ')';
 }
 ?>
