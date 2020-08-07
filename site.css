@@ -73,7 +73,8 @@ input, textarea, select {
     padding: 0.5em;
     border-radius: 2px;
     border: 0;
-    background-color: #e6f0ff;
+    background-color: #FAFCFF;
+    border: 1px solid #B2B5B9;
     font-size: 14px;
 }
 ol.explanation, p.explanation {
