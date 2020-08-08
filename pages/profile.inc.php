@@ -136,6 +136,7 @@ function handleForm() {
         !empty($_POST['contact_email']) && !empty($_POST['biography']) &&
         !empty($_POST['topics']) && !empty($_POST['available']) &&
         //!empty($_POST['signing']) &&
+        !empty($_POST['equipment']) && ($_POST['equipment'] !== 'other' || !empty($_POST['equipment_other'])) &&
         !empty($_POST['moderator']) &&
         !empty($_POST['recording']) && !empty($_POST['share_email']);
     if (!$sufficientData) {
@@ -165,17 +166,18 @@ function handleForm() {
 
     // Validation done - good to save
 
-    $profileSet = '
-        name = :name, badge_name = :badge_name, contact_email = :contact_email,
-        biography = :biography, info = :info,
-        website = :website, facebook = :facebook, twitter = :twitter,
-        instagram = :instagram, other_social = :other_social,
-        disability = :disability,
-        reading = :reading, moderator = :moderator,
-        recording = :recording, share_email = :share_email,
-        updated = :updated
-    ';
-    //signing = :signing,
+    $fields = array(
+        'name', 'badge_name', 'contact_email', 'biography', 'info',
+        'website', 'facebook', 'twitter', 'instagram', 'other_social',
+        'disability',
+        //'signing',
+        'reading', 'moderator', 'recording', 'share_email',
+        'equipment', 'ltuestudio',
+        'updated',
+    );
+    $profileSet = implode(', ', array_map(function($field) {
+        return "$field = :$field";
+    }, $fields));
     $data = [
         ':name' => $_POST['name'],
         ':badge_name' => $_POST['badge_name'],
@@ -196,6 +198,9 @@ function handleForm() {
         ':moderator' => $_POST['moderator'] === 'yes',
         ':recording' => $_POST['recording'] === 'yes',
         ':share_email' => $_POST['share_email'] === 'yes',
+
+        ':equipment' => $_POST['equipment'] === 'other' ? $_POST['equipment_other'] : $_POST['equipment'],
+        ':ltuestudio' => $_POST['ltuestudio'] ?? null,
 
         ':updated' => date('Y-m-d H:i:s'),
     ];
@@ -370,7 +375,23 @@ function availabilityValue($day, $part) {
         empty($_POST) && !empty($myAvailability[$day . '_' . $part])
     );
 }
+function fieldValue($key) {
+    global $panelist;
+    if (!empty($_POST[$key]))
+        return $_POST[$key];
+    if (!empty($panelist))
+        return $panelist[$key];
+    return null;
+}
 function valueIs($key, $check) {
+    global $panelist;
+    if (!empty($_POST[$key]))
+        return $_POST[$key] === $check;
+    if (!empty($panelist))
+        return $panelist[$key] === $check;
+    return false;
+}
+function valueIsBool($key, $check) {
     global $panelist;
     if (!empty($_POST[$key]))
         return $_POST[$key] === ($check ? 'yes' : 'no');
@@ -378,28 +399,23 @@ function valueIs($key, $check) {
         return $panelist[$key] === ($check ? '1' : '0');
     return false;
 }
-function valueIsNull($key) {
-    global $panelist;
-    if (!empty($_POST[$key]))
-        return $_POST[$key] === null;
-    if (!empty($panelist))
-        return $panelist[$key] === null;
-    return false;
-}
 function readingValue() {
     global $panelist;
     return $_POST['reading_topic'] ?? $panelist['reading'] ?? '';
 }
-function booleanForm($name, $required = true) {
+function radioOption($name, $value, $label, $checked, $required = false) {
     ob_start(); ?>
     <div class="shrinkwrap">
-        <input type="radio" id="<?= $name ?>-yes" name="<?= $name ?>" value="yes"<?= $required ? ' required' : '' ?><?= valueIs($name, true) ? ' checked' : '' ?>>
-        <label for="<?= $name ?>-yes">Yes</label>
+        <input type="radio" id="<?= $name ?>-<?= $value ?>" name="<?= $name ?>" value="<?= $value ?>"<?= $required ? ' required' : '' ?><?= $checked ? ' checked' : '' ?>>
+        <label for="<?= $name ?>-<?= $value ?>"><?= $label ?></label>
     </div>
-    <div class="shrinkwrap">
-        <input type="radio" id="<?= $name ?>-no" name="<?= $name ?>" value="no"<?= $required ? ' required' : '' ?><?= valueIs($name, false) ? ' checked' : '' ?>>
-        <label for="<?= $name ?>-no">No</label>
-    </div>
+<?php
+    return ob_get_clean();
+}
+function booleanForm($name, $required = true) {
+    ob_start(); ?>
+    <?= radioOption($name, 'yes', 'Yes', valueIsBool($name, true), $required) ?>
+    <?= radioOption($name, 'no', 'No', valueIsBool($name, false), $required) ?>
 <?php
     return ob_get_clean();
 }
@@ -477,7 +493,7 @@ function booleanForm($name, $required = true) {
         <label>Do you identify as someone disabled or differently abled, either mentally or physically?</label>
         <?= booleanForm('disability', false) ?>
         <div class="shrinkwrap">
-            <input type="radio" id="disability-null" name="disability" value="null"<?= valueIsNull('disability') ? ' checked' : '' ?>>
+            <input type="radio" id="disability-null" name="disability" value="null"<?= valueIs('disability', null) ? ' checked' : '' ?>>
             <label for="disability-null">Prefer not to say</label>
         </div>
 
@@ -593,6 +609,43 @@ function booleanForm($name, $required = true) {
                 <td><label><input type="checkbox" name="available[sat][even]"<?= availabilityValue('sat', 'even') ? 'checked ' : '' ?>/></label></td>
             </tr>
         </table>
+    </section>
+
+    <section id="av-equipment">
+        <label class="required">Since LTUE will likely be holding a virtual event, what quality of audio/video equipment could we expect you to have?</label>
+        <?php
+        $equipment = array(
+            'l:none' => "I don’t have any audio/video, not even a cell phone",
+            'l:cell-audio' => "I could call in—audio only—through my cell phone",
+            'l:integrated' => "I have a device with an integrated camera and microphone",
+            'l:decent' => "I have a decent gaming headset or other dedicated microphone, and a camera",
+            'l:studio' => "I have a full recording studio I can broadcast from",
+        );
+        ?>
+        <?php foreach ($equipment as $value => $label): ?>
+            <?= radioOption('equipment', $value, $label, valueIs('equipment', $value), true) ?>
+        <?php endforeach; ?>
+        <div class="shrinkwrap">
+            <?php
+                $eqChecked = false;
+                $eqOtherVal = '';
+                $eqVal = fieldValue('equipment');
+                if (empty($equipment[$eqVal])) {
+                    if ($eqVal)
+                        $eqChecked = true;
+
+                    if (!empty($_POST['equipment_other']))
+                        $eqOtherVal = $_POST['equipment_other'];
+                    else if (!empty($panelist['equipment']) && !array_key_exists($panelist['equipment'], $equipment))
+                        $eqOtherVal = $panelist['equipment'];
+                }
+            ?>
+            <input type="radio" id="equipment-other" name="equipment" value="other" required<?= $eqChecked ? ' checked' : '' ?>>
+            <label for="equipment-other">Other: <input type="text" name="equipment_other" value="<?= $eqOtherVal ?>" /></label>
+        </div>
+
+        <label>If LTUE offered a physical location with recording equipment in Provo, Utah to broadcast from, is that something you would be interested in using?</label>
+        <?= booleanForm('ltuestudio', false) ?>
     </section>
 
     <section id="interests">

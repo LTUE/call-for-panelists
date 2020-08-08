@@ -114,3 +114,6 @@ UPDATE topics SET name = "Wellness/Psychology" WHERE name = "Wellness Psychology
 
 
 ALTER TABLE panelists ADD updated DATETIME NOT NULL AFTER registered;
+
+ALTER TABLE panelists ADD ltuestudio BOOLEAN;
+ALTER TABLE panelists ADD equipment VARCHAR(191) NOT NULL;

@@ -77,6 +77,10 @@ div.half-width {
     width: 50%;
 }
 
+#equipment-other {
+    margin-top: 10px;
+}
+
 
 /* panels */
 section.panel {
