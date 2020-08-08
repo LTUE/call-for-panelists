@@ -81,10 +81,6 @@ function saveHABTM($data, $field, $join_key) {
     return;
 }
 
-$ethnicities = loadHABTM('ethnicities', 'id', 'label', 'id', 'ethnicity_id');
-$genders = loadHABTM('genders', 'id', 'label', 'id', 'gender_id');
-$sexualities = loadHABTM('sexualities', 'id', 'label', 'id', 'sexuality_id');
-$religions = loadHABTM('religions', 'id', 'name', 'id', 'religion_id');
 $topics = loadHABTM('topics', 'id', 'name', 'name', 'topic_id');
 
 
@@ -151,19 +147,28 @@ function handleForm() {
             return 'Please complete all required sections of the form, marked with a *';
     }
 
-    // optional field - sanitize
-    if (isset($_POST['disability'])) {
-        switch ($_POST['disability']) {
-        case 'yes':
-            $_POST['disability'] = true;
-            break;
-        case 'no':
-            $_POST['disability'] = false;
-            break;
-        default:
-            $_POST['disability'] = null;
-            break;
+    // optional fields - sanitize
+    function threeState($field) {
+        if (isset($_POST[$field])) {
+            switch ($_POST[$field]) {
+            case 'yes':
+                $_POST[$field] = true;
+                break;
+            case 'no':
+                $_POST[$field] = false;
+                break;
+            default:
+                $_POST[$field] = null;
+                break;
+            }
         }
+    }
+    threeState('person_of_color');
+    threeState('disability');
+    threeState('lgbtqia_plus');
+    if (!empty($_POST['gender_type'])) {
+        if ($_POST['gender_type'] === 'null' || $_POST['gender_type'] < -1 || $_POST['gender_type'] > 1)
+            $_POST['gender_type'] = null;
     }
 
     // Validation done - good to save
@@ -171,7 +176,7 @@ function handleForm() {
     $fields = array(
         'name', 'badge_name', 'contact_email', 'biography', 'info',
         'website', 'facebook', 'twitter', 'instagram', 'other_social',
-        'disability',
+        'person_of_color', 'disability', 'gender_type', 'lgbtqia_plus',
         //'signing',
         'reading', 'moderator', 'recording', 'share_email',
         'equipment', 'ltuestudio',
@@ -193,7 +198,10 @@ function handleForm() {
         ':instagram' => $_POST['instagram'] ?? '',
         ':other_social' => $_POST['other_social'] ?? '',
 
+        ':person_of_color' => $_POST['person_of_color'] ?? null,
         ':disability' => $_POST['disability'] ?? null,
+        ':gender_type' => $_POST['gender_type'] ?? null,
+        ':lgbtqia_plus' => $_POST['lgbtqia_plus'] ?? null,
 
         //':signing' => $_POST['signing'] === 'yes',
         ':reading' => $_POST['reading_topic'],
@@ -268,19 +276,7 @@ function handleForm() {
         $panelist['photo_file'] = $photoFile;
     }
 
-    global $ethnicities, $genders, $sexualities, $religions, $topics;
-    $error = saveHABTM($ethnicities, 'ethnicities', 'ethnicity_id');
-    if ($error)
-        return $error;
-    $error = saveHABTM($genders, 'genders', 'gender_id');
-    if ($error)
-        return $error;
-    $error = saveHABTM($sexualities, 'sexualities', 'sexuality_id');
-    if ($error)
-        return $error;
-    $error = saveHABTM($religions, 'religions', 'religion_id');
-    if ($error)
-        return $error;
+    global $topics;
     $error = saveHABTM($topics, 'topics', 'topic_id');
     if ($error)
         return $error;
@@ -484,24 +480,36 @@ function booleanForm($name, $required = true) {
         <h2>Demographics<a href="#demographics">#</a></h2>
         <p>LTUE remains committed to diversity in our panels and presentations. This information will not be used to determine suitability for a panel &mdash; it will only be used afterwards to select among equally suitable candidates to enhance diversity. All fields are optional.</p>
 
-        <label>What is your ethnicity? (Check all that apply)</label>
-        <?= habtmChecklist($ethnicities, 'ethnicities') ?>
+        <label>Are you a person of color?</label>
+        <?= booleanForm('person_of_color', false) ?>
+        <div class="shrinkwrap">
+            <input type="radio" id="person_of_color-null" name="person_of_color" value="null"<?= valueIs('person_of_color', null) ? ' checked' : '' ?>>
+            <label for="person_of_color-null">Prefer not to say</label>
+        </div>
 
-        <label>What is your gender identity?</label>
-        <?= habtmChecklist($genders, 'genders') ?>
-
-        <label>Do you identify as any of the following?</label>
-        <?= habtmChecklist($sexualities, 'sexualities') ?>
-
-        <label>Do you identify as someone disabled or differently abled, either mentally or physically?</label>
+        <label>Are you a person living with a disability or a chronic physical/mental illness?</label>
         <?= booleanForm('disability', false) ?>
         <div class="shrinkwrap">
             <input type="radio" id="disability-null" name="disability" value="null"<?= valueIs('disability', null) ? ' checked' : '' ?>>
             <label for="disability-null">Prefer not to say</label>
         </div>
 
-        <label>Do you have any of the following religious affiliations?</label>
-        <?= habtmChecklist($religions, 'religions') ?>
+        <label>Does any of the following describe you?</label>
+        <?= radioOption('gender_type', 1, 'Cisgender (The sex you were assigned at birth matches your gender identity)', valueIs('gender_type', '1')) ?>
+        <?= radioOption('gender_type', 0, 'Non-Binary', valueIs('gender_type', '0')) ?>
+        <!-- Trans = "the other side", so -1. Not a value statement. -->
+        <?= radioOption('gender_type', -1, 'Transgender', valueIs('gender_type', '-1')) ?>
+        <div class="shrinkwrap">
+            <input type="radio" id="gender_type-null" name="gender_type" value="null"<?= valueIs('gender_type', null) ? ' checked' : '' ?>>
+            <label for="gender_type-null">Prefer not to say</label>
+        </div>
+
+        <label>Would you consider yourself LGBTQIA+?</label>
+        <?= booleanForm('lgbtqia_plus', false) ?>
+        <div class="shrinkwrap">
+            <input type="radio" id="lgbtqia_plus-null" name="lgbtqia_plus" value="null"<?= valueIs('lgbtqia_plus', null) ? ' checked' : '' ?>>
+            <label for="lgbtqia_plus-null">Prefer not to say</label>
+        </div>
     </section>
 
     <section id="photo">
