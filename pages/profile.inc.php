@@ -120,6 +120,7 @@ function handleForm() {
     if (!empty($_POST['reading_topic']) && $_POST['reading_topic'] > 100)
         return 'Your reading book/style/genera description is too long';
 
+    /*
     for ($i = 1; $i <= 3; $i++) {
         if (empty($_POST['books'][$i]))
             continue;
@@ -131,6 +132,7 @@ function handleForm() {
         if (!empty($data['isbn']) && strlen($data['isbn']) > 50)
             return 'Validation failed - no book ISBN may exceed 20 characters';
     }
+     */
 
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
         !empty($_POST['contact_email']) && !empty($_POST['biography']) &&
@@ -286,7 +288,7 @@ function handleForm() {
 
     // TODO: slightly less lazy books
     // TODO: field limits!
-
+    /*
     $removeBooks = $db->prepare('DELETE FROM books_to_stock WHERE panelist_id = :id');
     $removeBooks->execute(array(':id' => $panelist['id']));
     $books = [];
@@ -311,6 +313,7 @@ function handleForm() {
             return 'Failed to save book suggestions - please try again or contact support';
         }
     }
+    */
 
     // TODO: bad architecture; should do something w/time ranges instead.
     // TODO: remove interested panels when changing availability!
