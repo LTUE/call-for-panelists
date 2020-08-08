@@ -518,7 +518,7 @@ function booleanForm($name, $required = true) {
     </section>
 
     <section id="reading">
-        <label>Would you be interested in doing a reading of one of your books?</label>
+        <label>Would you be interested in doing a reading from one of your books or stories?</label>
         <div class="shrinkwrap">
             <input type="radio" id="reading-yes" name="reading" value="yes"<?= (!empty($_POST['reading']) ? $_POST['reading'] === 'yes' : !!readingValue()) ? ' checked' : '' ?>>
             <label for="reading-yes">Yes</label>
