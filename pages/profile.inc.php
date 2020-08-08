@@ -402,7 +402,7 @@ function booleanForm($name, $required = true) {
 
 <?php $year = 2021; /* TODO: auto-calculate */ ?>
 <p>Welcome to the <?= $year; ?> LTUE Call for Panelists! Please sign up for panels for which you are interested and qualified. Please note that expressing interest will not automatically put you on a panel. As we create our schedule, we will notify you if/when you have been selected for a panel.</p>
-<p>We highly recommend submitting a presentation/workshop this year. That is available on a separate form here: <a href="https://forms.gle/nVAoC5ExYguXnC2d8">https://forms.gle/nVAoC5ExYguXnC2d8</a>.</p>
+<p>We highly recommend submitting a presentation/workshop this year. That is available on a separate form here: <a href="https://forms.gle/nVAoC5ExYguXnC2d8" target="_blank">https://forms.gle/nVAoC5ExYguXnC2d8</a>.</p>
 <p><strong>This Call for Panelists will close on September 7<sup>th</sup>.</strong> We will begin contacting those who have been selected for panels in November.</p>
 <p>LTUE is Thurday Feb. 11<sup>th</sup> to Saturday Feb. 13<sup>th</sup>, 2021.</p>
 <p><strong>You must click Update Profile</strong> in order to save this form.</p>
