@@ -49,8 +49,13 @@ body.small-form form {
     width: 272px;
     margin-top: 8px;
 }
-body.small-form input[type=submit] {
+body.small-form input[type=submit],
+body.small-form button[type=submit] {
     float: right;
+}
+
+body.small-form label {
+    clear: both;
 }
 
 body.small-form p {

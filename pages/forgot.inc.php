@@ -6,19 +6,6 @@ if (!empty($_SESSION['panelist_id']) || !empty($_SESSION['account_id'])) {
     header('Location: /profile');
     exit;
 }
-?>
-<?php
-/*
-    $save = $db->prepare('UPDATE accounts SET reset_counter = reset_counter + 1 WHERE id = :id and reset_counter');
-    $save->execute(array(
-        ':email' => $_POST['email'],
-        ':type' => 'panelist',
-        ':password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
-    ));
-    if ($create->rowCount() !== 1) {
-        return 'We failed to create your account. I don\'t know why. Try again?';
-    }
-*/
 
 function handleForm() {
     global $db;

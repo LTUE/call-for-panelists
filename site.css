@@ -92,7 +92,8 @@ textarea, textarea + p.explanation, input[type=file] + p.explanation, p.explanat
 textarea {
     height: 12ex;
 }
-input[type=submit] {
+input[type=submit],
+button[type=submit] {
     color: white;
     background-color: #1593c0;
     border-radius: 6px;
