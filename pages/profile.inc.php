@@ -591,19 +591,19 @@ function booleanForm($name, $required = true) {
                 <th>4:00 pm - end of day</th>
             </tr>
             <tr>
-                <th>Thursday Feb. 13, 2020</th>
+                <th>Thursday Feb. 11, 2021</th>
                 <td><label><input type="checkbox" name="available[thu][morn]" <?= availabilityValue('thu', 'morn') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[thu][day]" <?= availabilityValue('thu', 'day') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[thu][even]" <?= availabilityValue('thu', 'even') ? 'checked ' : '' ?>/></label></td>
             </tr>
             <tr>
-                <th>Friday Feb. 14, 2020</th>
+                <th>Friday Feb. 12, 2021</th>
                 <td><label><input type="checkbox" name="available[fri][morn]"<?= availabilityValue('fri', 'morn') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[fri][day]"<?= availabilityValue('fri', 'day') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[fri][even]"<?= availabilityValue('fri', 'even') ? 'checked ' : '' ?>/></label></td>
             </tr>
             <tr>
-                <th>Saturday Feb. 15, 2020</th>
+                <th>Saturday Feb. 13, 2021</th>
                 <td><label><input type="checkbox" name="available[sat][morn]"<?= availabilityValue('sat', 'morn') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[sat][day]"<?= availabilityValue('sat', 'day') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[sat][even]"<?= availabilityValue('sat', 'even') ? 'checked ' : '' ?>/></label></td>
