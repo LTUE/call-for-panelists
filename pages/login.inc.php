@@ -45,7 +45,8 @@ function handleForm() {
         if (!empty($row)) {
             $id = $row['id'];
         } else {
-            $pquery = $db->prepare('SELECT * FROM panelists WHERE contact_email = :email');
+            // TODO: there can be multiple!
+            $pquery = $db->prepare('SELECT * FROM panelists WHERE contact_email = :email ORDER BY id DESC');
             $pquery->execute(array(':email' => $_POST['email']));
             $panelist = $pquery->fetch(PDO::FETCH_ASSOC);
 
