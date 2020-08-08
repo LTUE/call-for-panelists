@@ -547,7 +547,7 @@ function booleanForm($name, $required = true) {
 
     <section id="moderator">
         <h2>Moderator Interest<a href="#moderator">#</a></h2>
-        <p class="label">If you are interested in being a moderator, please review the <a href="https://drive.google.com/file/d/1IPo7povWSiXCtzFIY6kGhIvDmrpHVVt9/view">moderator tips document</a>, you will be expected to attend a moderator training and follow those guidelines, which include:</p>
+        <p class="label">If you are interested in being a moderator, please review the <a href="https://drive.google.com/file/d/1IPo7povWSiXCtzFIY6kGhIvDmrpHVVt9/view">moderator tips document</a>. You will be expected to attend a moderator training and follow those guidelines, which include:</p>
         <ol class="explanation">
             <li>Starting and ending the panel on time</li>
             <li>Proper Panel Preparation</li>
