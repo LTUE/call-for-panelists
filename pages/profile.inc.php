@@ -461,7 +461,7 @@ function booleanForm($name, $required = true) {
 
     <section id="demographics">
         <h2>Demographics<a href="#demographics">#</a></h2>
-        <p>LTUE remains committed to diversity in our panels and presentations. We intend to use this data to craft a diversity index for each panel. This information will not be used to determine suitability for a panel &mdash; it will only be used afterwards to select among equally suitable candidates to enhance diversity. All fields are optional.</p>
+        <p>LTUE remains committed to diversity in our panels and presentations. This information will not be used to determine suitability for a panel &mdash; it will only be used afterwards to select among equally suitable candidates to enhance diversity. All fields are optional.</p>
 
         <label>What is your ethnicity? (Check all that apply)</label>
         <?= habtmChecklist($ethnicities, 'ethnicities') ?>
