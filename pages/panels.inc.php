@@ -159,7 +159,7 @@ function prettyTime($time) {
 <?php endif; ?>
 <?php foreach ($panels as $panel): ?>
     <section class="panel">
-        <h2><?= htmlspecialchars($panel['title'], ENT_QUOTES) ?></h2>
+        <h2><?= htmlspecialchars($panel['title'], ENT_QUOTES) ?><?= $panel['minutes'] == 105 ? ' (2 hours)': ''?></h2>
         <h3><?= prettyTime($panel['time']) ?> - <?= date('l, M j', strtotime($panel['day'])) ?></h3>
         <ul class="tags">
         <?php foreach(explode(',', $panel['topic_ids']) as $id): ?>
