@@ -97,7 +97,7 @@ function handleForm() {
                 'subject' => 'Login for LTUE Call for Panelists',
                 'text' => "Please go to https://panelists.ltue.org/login/$token to login to your account.",
                 'html' => <<<HTML
-    Please go to <a href="https://panelists.ltue.org/login/$token">https://panelists.ltue.org/login/$token</a> to login to your account.
+Please go to <a href="https://panelists.ltue.org/login/$token">https://panelists.ltue.org/login/$token</a> to login to your account.
 HTML
             ],
         ]);
