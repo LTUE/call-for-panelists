@@ -135,7 +135,8 @@ function handleForm() {
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
         !empty($_POST['contact_email']) && !empty($_POST['biography']) &&
         !empty($_POST['topics']) && !empty($_POST['available']) &&
-        !empty($_POST['signing']) && !empty($_POST['moderator']) &&
+        //!empty($_POST['signing']) &&
+        !empty($_POST['moderator']) &&
         !empty($_POST['recording']) && !empty($_POST['share_email']);
     if (!$sufficientData) {
         // client-side validation should catch most missing fields, so simple check and fail
@@ -170,10 +171,11 @@ function handleForm() {
         website = :website, facebook = :facebook, twitter = :twitter,
         instagram = :instagram, other_social = :other_social,
         disability = :disability,
-        signing = :signing, reading = :reading, moderator = :moderator,
+        reading = :reading, moderator = :moderator,
         recording = :recording, share_email = :share_email,
         updated = :updated
     ';
+    //signing = :signing,
     $data = [
         ':name' => $_POST['name'],
         ':badge_name' => $_POST['badge_name'],
@@ -189,7 +191,7 @@ function handleForm() {
 
         ':disability' => $_POST['disability'] ?? null,
 
-        ':signing' => $_POST['signing'] === 'yes',
+        //':signing' => $_POST['signing'] === 'yes',
         ':reading' => $_POST['reading_topic'],
         ':moderator' => $_POST['moderator'] === 'yes',
         ':recording' => $_POST['recording'] === 'yes',
@@ -497,6 +499,7 @@ function booleanForm($name, $required = true) {
         <p class="explanation">We would like to use your head shot in promotions and social media. Please upload your photo here. This should be a professional style photo that shows your face clearly and has a unobtrusive background.</p>
     </section>
 
+<?php /* not this year ?>
     <section id="books">
         <p>If you would like one of LTUE's book partners to carry your books on consignment or through traditional sale (note: <span title="our sellers can only carry so many books">3 title limit</span>), please enter the information below.</p>
         <table>
@@ -519,6 +522,7 @@ function booleanForm($name, $required = true) {
         <label class="required">Are you interested in participating in the LTUE Mass Signing on Friday February 12<sup>th</sup> from 6:30 pm to 8:00 pm?</label>
         <?= booleanForm('signing') ?>
     </section>
+<?php */ ?>
 
     <section id="reading">
         <label>Would you be interested in doing a reading from one of your books or stories?</label>
