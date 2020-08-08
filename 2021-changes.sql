@@ -106,7 +106,11 @@ ALTER TABLE panelists ADD registered DATETIME NOT NULL AFTER account_id;
 /* 2021 we don't really have rooms if we go online */
 ALTER TABLE panels CHANGE room_id room_id INT UNSIGNED;
 
+/* Should have renamed CYOW instead of deleting/re-adding */
 DELETE FROM tracks WHERE name = 'CYOW';
 INSERT IGNORE INTO tracks (name) VALUES ('Editing'), ('Worldbuilding');
 
 UPDATE topics SET name = "Wellness/Psychology" WHERE name = "Wellness Psychology";
+
+
+ALTER TABLE panelists ADD updated DATETIME NOT NULL AFTER registered;

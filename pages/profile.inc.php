@@ -171,7 +171,8 @@ function handleForm() {
         instagram = :instagram, other_social = :other_social,
         disability = :disability,
         signing = :signing, reading = :reading, moderator = :moderator,
-        recording = :recording, share_email = :share_email
+        recording = :recording, share_email = :share_email,
+        updated = :updated
     ';
     $data = [
         ':name' => $_POST['name'],
@@ -193,12 +194,14 @@ function handleForm() {
         ':moderator' => $_POST['moderator'] === 'yes',
         ':recording' => $_POST['recording'] === 'yes',
         ':share_email' => $_POST['share_email'] === 'yes',
+
+        ':updated' => date('Y-m-d H:i:s'),
     ];
 
     if (empty($panelist)) {
         $saveQuery = 'INSERT INTO panelists SET account_id = :account_id, registered = :registered, ' . $profileSet;
         $data[':account_id'] = $_SESSION['account_id'] ?? NULL;
-        $data[':registered'] = date('Y-m-d H:i:s');
+        $data[':registered'] = $data[':updated'];
     } else {
         $saveQuery = 'UPDATE panelists SET ' . $profileSet . ' WHERE id = :id';
         $data[':id'] = $_SESSION['panelist_id'];
