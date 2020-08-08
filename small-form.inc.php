@@ -32,8 +32,25 @@
     <hr />
 
     <main>
+        <nav>
+            <ul>
+                <li>
+                    <?php if ($path[1] === 'register'): ?>
+                    <span class="active">Register</span>
+                    <?php else: ?>
+                    <a href="/register">Register</a>
+                    <?php endif; ?>
+                </li>
+                <li>
+                    <?php if ($path[1] === 'login'): ?>
+                    <span class="active">Log In</span>
+                    <?php else: ?>
+                    <a href="/login">Log In</a>
+                    <?php endif; ?>
+                </li>
+        </nav>
         <?= $content ?>
-
+        <p>Or <a href="/profile">continue without an account</a>. You will have to log in with an email link to change your answers later.</p>
     </main>
 </body>
 </html>

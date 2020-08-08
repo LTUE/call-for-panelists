@@ -150,16 +150,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
-    <label for="email">Login Email</label>
+    <label for="email">Email</label>
     <input type="email" id="email" name="email">
-    <button type="submit" name="magic">Magic Link</button>
+    <button type="submit" name="magic">Log in with Email Link</button>
 
     <label for="password">Password</label>
     <input type="password" id="password" name="password">
 
     <input type="submit" value="Log in">
     <a id="forgot-link" href="/forgot">Forgot Password?</a>
-    <p>Haven't made an account? <a href="/register">Register</a></p>
-    <p>Or <a href="/profile">continue without an account</a>. You will have to log in with a magic link to change your answers later.</p>
 </form>
 <?php endif; ?>

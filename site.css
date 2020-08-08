@@ -105,6 +105,10 @@ button[type=submit] {
     padding: 0.5em 1.25em;
     cursor: pointer;
 }
+button[type=submit] {
+    border-width: 0;
+    font-size: 14px;
+}
 input[type=file] {
     background-color: inherit;
     padding: 0;
@@ -130,4 +134,34 @@ input[type=radio], input[type=checkbox] {
 }
 div.shrinkwrap {
     margin-top: 0.3em;
+}
+
+nav > a {
+    display: inline-block;
+}
+nav ul {
+    float: right;
+    list-style-type: none;
+    text-transform: uppercase;
+    margin-top: 5px; /* hack; good enough */
+}
+nav ul li {
+    float: left;
+    margin-left: 1em;
+}
+nav ul li a,
+nav ul li span.active {
+    font-size: 14px;
+    color: #898989;
+    text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
+}
+nav ul li a:hover,
+nav ul li a:focus,
+nav ul li span.active {
+    text-decoration: underline;
+    color: #1593c0;
+}
+nav ul li span.active {
+    cursor: default;
 }

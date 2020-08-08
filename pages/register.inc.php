@@ -90,7 +90,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
 <?php if (!empty($error)): ?>
     <output class="error"><?= $error ?></output>
 <?php endif; ?>
-    <label for="email">Login Email</label>
+    <label for="email">Email</label>
     <input type="email" id="email" name="email" required value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES) ?>">
 
     <label for="password">Password</label>
@@ -100,7 +100,4 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     <input type="password" id="password-confirm" name="password-confirm" required>
 
     <input type="submit" value="Register">
-
-    <p>Already signed up? <a href="/login">Login</a></p>
-    <p>Or <a href="/profile">continue without an account</a>. You will not be able to change your answers later.</p>
 </form>

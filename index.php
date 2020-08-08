@@ -18,7 +18,7 @@ session_name('LTUE_PANELIST');
 session_start();
 
 // Single file routing system
-$page = 'login';
+$page = 'register';
 if (!empty($_SESSION['panelist_id']) || !empty($_SESSION['account_id'])) {
     $page = 'profile';
 }
