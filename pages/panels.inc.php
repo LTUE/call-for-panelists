@@ -187,7 +187,7 @@ function prettyTime($time) {
         <?php endforeach; ?>
         </select>
 
-        <label for="panel-<?= $panel['id'] ?>-qualifications">If you would like, you may provide context</label>
+        <label for="panel-<?= $panel['id'] ?>-qualifications">What context/content/experience would you bring to this panel?</label>
         <textarea id="panel-<?= $panel['id'] ?>-qualifications" name="panels[<?= $panel['id'] ?>][qualifications]" maxlength=200><?= $_POST['panels'][$panel['id']]['qualifications'] ?? $panel['qualifications'] ?? '' ?></textarea>
         <p class="explanation">This is optional, and limited to 200 characters</p>
     </section>
