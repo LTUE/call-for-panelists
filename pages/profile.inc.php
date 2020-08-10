@@ -661,7 +661,7 @@ function booleanForm($name, $required = true) {
 
     <section id="interests">
         <h2>Panel Category Interest<a href="#interests">#</a></h2>
-        <label class="long required">Which types of panels are you interested in? (mark all that apply) We will only show panels related to your selections and time frame in the next section</label>
+        <label class="long required">Which types of panels could you confidently present? (mark all that apply) We will only show panels related to your selections and time frame in the next section</label>
         <?= habtmChecklist($topics, 'topics') ?>
     </section>
 
