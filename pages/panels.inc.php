@@ -190,6 +190,8 @@ function prettyTime($time) {
         <label for="panel-<?= $panel['id'] ?>-qualifications">What context/content/experience would you bring to this panel?</label>
         <textarea id="panel-<?= $panel['id'] ?>-qualifications" name="panels[<?= $panel['id'] ?>][qualifications]" maxlength=200><?= $_POST['panels'][$panel['id']]['qualifications'] ?? $panel['qualifications'] ?? '' ?></textarea>
         <p class="explanation">This is optional, and limited to 200 characters</p>
+
+        <button type="submit">Save Panel</button>
     </section>
 <?php endforeach; ?>
     <input type="submit" value="Update Panel Selection">
