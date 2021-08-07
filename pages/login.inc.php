@@ -96,7 +96,7 @@ function handleForm() {
                 'from' => 'LTUE Call For Panelists <mailgun@panelists.ltue.org>',
                 'to' => $_POST['email'],
                 'subject' => 'Login for LTUE Call for Panelists',
-                'text' => "Please go to https://panelists.ltue.org/login/$token to login to your account.",
+                'text' => "Please go to https://panelists.ltue.net/login/$token to login to your account.",
                 'html' => <<<HTML
 Please go to <a href="https://panelists.ltue.org/login/$token">https://panelists.ltue.org/login/$token</a> to login to your account.
 HTML
@@ -104,7 +104,6 @@ HTML
         ]);
         $response = curl_exec($ch);
         curl_close($ch);
-
     } else if (!empty($_POST['email']) && !empty($_POST['password'])) {
         $query = $db->prepare('SELECT * FROM accounts WHERE email = :email');
         $query->execute(array(':email' => $_POST['email']));

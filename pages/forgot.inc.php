@@ -34,7 +34,7 @@ function handleForm() {
             'from' => 'LTUE Call For Panelists <mailgun@panelists.ltue.org>',
             'to' => $row['email'],
             'subject' => 'Your LTUE Panelist Account Password Reset',
-            'text' => "Please go to https://panelists.ltue.org/forgot/$token to reset your password.",
+            'text' => "Please go to https://panelists.ltue.net/forgot/$token to reset your password.",
             'html' => <<<HTML
 Please go to <a href="https://panelists.ltue.org/forgot/$token">https://panelists.ltue.org/forgot/$token</a> to reset your password.
 HTML
