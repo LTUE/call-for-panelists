@@ -14,3 +14,7 @@ INSERT INTO panelists_topics (panelist_id, topic_id) (SELECT panelist_id, 25 FRO
 UPDATE topics SET name = 'Politics' WHERE name = 'Politics/Economics'; -- 14
 INSERT INTO topics SET name = 'Economics'; -- 26
 INSERT INTO panelists_topics (panelist_id, topic_id) (SELECT panelist_id, 26 FROM panelists_topics WHERE topic_id = 14);
+
+UPDATE topics SET name = 'Technology' WHERE name = 'Technology/Physics';
+UPDATE topics SET name = 'Wellness' WHERE name = 'Wellness/Psychology';
+UPDATE topics SET name = 'Biology' WHERE name = 'Biology/Medicine';
