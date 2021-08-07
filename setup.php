@@ -16,6 +16,7 @@ try {
     exit;
 }
 
-// TODO: only when debugging
-error_reporting(E_ALL);
-ini_set('display_errors', true);
+if (defined('TESTING')) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', true);
+}

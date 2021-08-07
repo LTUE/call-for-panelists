@@ -85,6 +85,8 @@ function handleForm() {
         $token = rtrim(strtr(base64_encode(
             $data . pack('H64', hash_hmac('sha256', $data, RESET_KEY))
         ), '+/', '-_'), '=');
+        if (defined('TESTING'))
+            die($token);
 
         $ch = curl_init();
         curl_setopt_array($ch, [
