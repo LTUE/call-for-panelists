@@ -1,12 +1,14 @@
 <?php
 
-//require('closed.inc.php');
-//die;
-
 // checked in in-webroot files to prevent direct access in case the .htaccess is corrupted…
 // TODO: don't put included files in the webroot :P.
 define('INCLUDED', true);
 require('setup.php');
+
+if (defined('CLOSED')) {
+    require('closed.inc.php');
+    die;
+}
 
 // prevent fixation attacks
 ini_set('session.use_trans_sid', false);
