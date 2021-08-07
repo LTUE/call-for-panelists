@@ -174,7 +174,7 @@ function handleForm() {
         'name', 'badge_name', 'contact_email', 'biography', 'info',
         'website', 'facebook', 'twitter', 'instagram', 'other_social',
         'person_of_color', 'disability', 'gender_type', 'lgbtqia_plus',
-        'signing', 'reading', 'moderator', 'recording', 'share_email',
+        'signing', 'reading', 'moderator', 'judge', 'recording', 'share_email',
         'updated',
     );
     $profileSet = implode(', ', array_map(function($field) {
@@ -201,6 +201,7 @@ function handleForm() {
         ':signing' => $_POST['signing'] === 'yes',
         ':reading' => $_POST['reading_topic'],
         ':moderator' => $_POST['moderator'] === 'yes',
+        ':judge' => !empty($_POST['judge']) ? $_POST['judge'] === 'yes' : null,
         ':recording' => $_POST['recording'] === 'yes',
         ':share_email' => $_POST['share_email'] === 'yes',
 
@@ -576,6 +577,12 @@ function booleanForm($name, $required = true) {
         </ol>
         <label class="required">Are you interested in being a Moderator?</label>
         <?= booleanForm('moderator') ?>
+    </section>
+
+    <section id="judge">
+        <h2>Fiction Contest Judge</h2>
+        <label>Are you interested in being a judge for an LTUE fiction contest this year? (We would email more specifics before finalizing the group of judges.)</label>
+        <?= booleanForm('judge', false) ?>
     </section>
 
     <section id="availability">
