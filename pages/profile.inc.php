@@ -411,11 +411,11 @@ function booleanForm($name, $required = true) {
 }
 ?>
 
-<?php $year = 2021; /* TODO: auto-calculate */ ?>
+<?php $year = 2022; /* TODO: auto-calculate */ ?>
 <p>Welcome to the <?= $year; ?> LTUE Call for Panelists! Please sign up for panels for which you are interested and qualified. Please note that expressing interest will not automatically put you on a panel. As we create our schedule, we will notify you if/when you have been selected for a panel.</p>
 <p>We highly recommend submitting a presentation/workshop this year. That is available on a separate form here: <a href="https://forms.gle/nVAoC5ExYguXnC2d8" target="_blank">https://forms.gle/nVAoC5ExYguXnC2d8</a>.</p>
 <p><strong>This Call for Panelists will close on September 7<sup>th</sup>.</strong> We will begin contacting those who have been selected for panels in November.</p>
-<p>LTUE is Thurday Feb. 11<sup>th</sup> to Saturday Feb. 13<sup>th</sup>, 2021.</p>
+<p>LTUE is Thurday Feb. 17<sup>th</sup> to Saturday Feb. 19<sup>th</sup>, 2022.</p>
 <p><strong>You must click Update Profile</strong> in order to save this form.</p>
 <form id="profile" method="POST" enctype="multipart/form-data">
 <?php if (!empty($error)): ?>
@@ -597,19 +597,19 @@ function booleanForm($name, $required = true) {
                 <th>4:00 pm - end of day</th>
             </tr>
             <tr>
-                <th>Thursday Feb. 11, 2021</th>
+                <th>Thursday Feb. 17, 2022</th>
                 <td><label><input type="checkbox" name="available[thu][morn]" <?= availabilityValue('thu', 'morn') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[thu][day]" <?= availabilityValue('thu', 'day') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[thu][even]" <?= availabilityValue('thu', 'even') ? 'checked ' : '' ?>/></label></td>
             </tr>
             <tr>
-                <th>Friday Feb. 12, 2021</th>
+                <th>Friday Feb. 18, 2022</th>
                 <td><label><input type="checkbox" name="available[fri][morn]"<?= availabilityValue('fri', 'morn') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[fri][day]"<?= availabilityValue('fri', 'day') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[fri][even]"<?= availabilityValue('fri', 'even') ? 'checked ' : '' ?>/></label></td>
             </tr>
             <tr>
-                <th>Saturday Feb. 13, 2021</th>
+                <th>Saturday Feb. 19, 2022</th>
                 <td><label><input type="checkbox" name="available[sat][morn]"<?= availabilityValue('sat', 'morn') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[sat][day]"<?= availabilityValue('sat', 'day') ? 'checked ' : '' ?>/></label></td>
                 <td><label><input type="checkbox" name="available[sat][even]"<?= availabilityValue('sat', 'even') ? 'checked ' : '' ?>/></label></td>

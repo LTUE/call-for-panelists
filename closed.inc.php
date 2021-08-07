@@ -30,8 +30,8 @@
 <body class="small-form">
     <header>
         <img src="/img/LTUELogo.png" />
-        <h1>The 2021 LTUE Call for Panelists is closed</h1>
-        <h2>The LTUE 2022 call will open around August 2021. Please email <a href="mailto:contact@ltue.net">contact@ltue.net</a> for more information</h2>
+        <h1>The 2022 LTUE Call for Panelists is closed</h1>
+        <h2>The LTUE 2023 call will open around August 2022. Please email <a href="mailto:contact@ltue.net">contact@ltue.net</a> for more information</h2>
     </header>
 </body>
 </html>

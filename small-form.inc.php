@@ -26,8 +26,8 @@
 <body class="small-form">
     <header>
         <img src="/img/LTUELogo.png" />
-        <h1>Welcome to the 2021 LTUE Call for Panelists!</h1>
-        <h2>Sign up here to be considered for a panelist or presenter at LTUE February 11-13, 2021, in Provo, Utah.</h2>
+        <h1>Welcome to the 2022 LTUE Call for Panelists!</h1>
+        <h2>Sign up here to be considered for a panelist or presenter at LTUE February 17-19, 2022, in Provo, Utah.</h2>
     </header>
     <hr />
 
