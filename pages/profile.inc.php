@@ -116,7 +116,6 @@ function handleForm() {
     if (!empty($_POST['reading_topic']) && $_POST['reading_topic'] > 100)
         return 'Your reading book/style/genera description is too long';
 
-    /*
     for ($i = 1; $i <= 3; $i++) {
         if (empty($_POST['books'][$i]))
             continue;
@@ -128,12 +127,11 @@ function handleForm() {
         if (!empty($data['isbn']) && strlen($data['isbn']) > 50)
             return 'Validation failed - no book ISBN may exceed 20 characters';
     }
-     */
 
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
         !empty($_POST['contact_email']) && !empty($_POST['biography']) &&
         !empty($_POST['topics']) && !empty($_POST['available']) &&
-        //!empty($_POST['signing']) &&
+        !empty($_POST['signing']) &&
         !empty($_POST['moderator']) &&
         !empty($_POST['recording']) && !empty($_POST['share_email']);
     if (!$sufficientData) {
@@ -176,8 +174,7 @@ function handleForm() {
         'name', 'badge_name', 'contact_email', 'biography', 'info',
         'website', 'facebook', 'twitter', 'instagram', 'other_social',
         'person_of_color', 'disability', 'gender_type', 'lgbtqia_plus',
-        //'signing',
-        'reading', 'moderator', 'recording', 'share_email',
+        'signing', 'reading', 'moderator', 'recording', 'share_email',
         'updated',
     );
     $profileSet = implode(', ', array_map(function($field) {
@@ -201,7 +198,7 @@ function handleForm() {
         ':gender_type' => $_POST['gender_type'] ?? null,
         ':lgbtqia_plus' => $_POST['lgbtqia_plus'] ?? null,
 
-        //':signing' => $_POST['signing'] === 'yes',
+        ':signing' => $_POST['signing'] === 'yes',
         ':reading' => $_POST['reading_topic'],
         ':moderator' => $_POST['moderator'] === 'yes',
         ':recording' => $_POST['recording'] === 'yes',
@@ -279,7 +276,6 @@ function handleForm() {
 
     // TODO: slightly less lazy books
     // TODO: field limits!
-    /*
     $removeBooks = $db->prepare('DELETE FROM books_to_stock WHERE panelist_id = :id');
     $removeBooks->execute(array(':id' => $panelist['id']));
     $books = [];
@@ -304,7 +300,6 @@ function handleForm() {
             return 'Failed to save book suggestions - please try again or contact support';
         }
     }
-    */
 
     // TODO: bad architecture; should do something w/time ranges instead.
     // TODO: remove interested panels when changing availability!
@@ -521,7 +516,6 @@ function booleanForm($name, $required = true) {
         <p class="explanation">We would like to use your head shot in promotions and social media. Please upload your photo here. This should be a professional style photo that shows your face clearly and has a unobtrusive background.</p>
     </section>
 
-<?php /* not this year ?>
     <section id="books">
         <p>If you would like one of LTUE's book partners to carry your books on consignment or through traditional sale (note: <span title="our sellers can only carry so many books">3 title limit</span>), please enter the information below.</p>
         <table>
@@ -544,7 +538,6 @@ function booleanForm($name, $required = true) {
         <label class="required">Are you interested in participating in the LTUE Mass Signing on Friday February 12<sup>th</sup> from 6:30 pm to 8:00 pm?</label>
         <?= booleanForm('signing') ?>
     </section>
-<?php */ ?>
 
     <section id="reading">
         <label>Would you be interested in doing a reading from one of your books or stories?</label>
