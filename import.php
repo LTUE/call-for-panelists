@@ -48,6 +48,7 @@ array(8) {
   [6]=> string(2) "TH"
   [7]=> string(3) "3PM"
 }
+2022 - same as 2021
 CREATE TABLE IF NOT EXISTS panels (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     day DATE NOT NULL,
@@ -72,13 +73,13 @@ while ($line = fgetcsv($stdin, 0, "\t")) {
 
     switch ($line[6]) {
     case 'TH':
-        $day = '2021-02-11';
+        $day = '2022-02-17';
         break;
     case 'FR':
-        $day = '2021-02-12';
+        $day = '2022-02-18';
         break;
     case 'SA':
-        $day = '2021-02-13';
+        $day = '2022-02-19';
         break;
     default:
         trigger_error('Invalid day for panel: ' . $line[6] . ', skipping line ' . $line_no, E_USER_WARNING);
@@ -132,20 +133,19 @@ while ($line = fgetcsv($stdin, 0, "\t")) {
 
         // GRRR.... NO MORE XLS INPUT! I AM FURIOUS!! THIS IS A RECIPE FOR A _NIGHTMARE_!
         switch ($topic) {
-        case 'prodev':
-        case 'pro-dev':
-            $topic = 'professional development';
-            break;
-        case 'wellness':
-        case 'wellness psychology':
-            $topic = 'wellness/psychology';
+        case 'biology':
+            $topic = 'biology/medicine';
             break;
         case 'technology':
             $topic = 'technology/physics';
             break;
-        case 'history':
-            $topic = 'geography/history';
+        case 'wellness':
+            $topic = 'wellness/psychology';
             break;
+
+        // Not a tag
+        case 'tma':
+            continue 2;
         }
 
         $topic_id = array_search($topic, $topics);
@@ -153,6 +153,9 @@ while ($line = fgetcsv($stdin, 0, "\t")) {
             trigger_error('Invalid topic/tag: ' . $topic . ', skipping line ' . $line_no, E_USER_WARNING);
             continue;
         }
+        // Ignore duplicate tags
+        if (false !== array_search($topic_id, $topic_ids))
+            continue;
         array_push($topic_ids, $line[0], $topic_id);
     }
     if (count($panel_topics) !== (count($topic_ids) / 2))
