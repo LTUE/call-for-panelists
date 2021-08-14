@@ -18,3 +18,14 @@ INSERT INTO panelists_topics (panelist_id, topic_id) (SELECT panelist_id, 26 FRO
 UPDATE topics SET name = 'Technology' WHERE name = 'Technology/Physics';
 UPDATE topics SET name = 'Wellness' WHERE name = 'Wellness/Psychology';
 UPDATE topics SET name = 'Biology' WHERE name = 'Biology/Medicine';
+
+CREATE TABLE IF NOT EXISTS panelist_suggestions (
+    panelist_id INT UNSIGNED NOT NULL,
+    position TINYINT UNSIGNED NOT NULL,
+    title TINYTEXT,
+    description TINYTEXT,
+    pitch TEXT,
+
+    CONSTRAINT FOREIGN KEY (panelist_id) REFERENCES panelists(id) ON DELETE CASCADE,
+    PRIMARY KEY (panelist_id, position)
+);

@@ -85,6 +85,7 @@ $topics = loadHABTM('topics', 'id', 'name', 'name', 'topic_id');
 
 
 $myBooks = [];
+$mySuggestions = [];
 $myAvailability = [];
 if ($panelist) {
     $getMyBooks = $db->prepare(
@@ -93,6 +94,14 @@ if ($panelist) {
     $getMyBooks->execute(array(':id' => $panelist['id']));
     foreach ($getMyBooks->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $myBooks[$row['position']] = $row;
+    }
+
+    $getMySuggestions = $db->prepare(
+        'SELECT position, title, description, pitch FROM panelist_suggestions WHERE panelist_id = :id'
+    );
+    $getMySuggestions->execute(array(':id' => $panelist['id']));
+    foreach ($getMySuggestions->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $mySuggestions[$row['position']] = $row;
     }
 
     $getMyAvailability = $db->prepare('SELECT * FROM panelist_availability WHERE panelist_id = :id');
@@ -126,6 +135,17 @@ function handleForm() {
             return 'Validation failed - no book author may exceed 50 characters';
         if (!empty($data['isbn']) && strlen($data['isbn']) > 50)
             return 'Validation failed - no book ISBN may exceed 20 characters';
+    }
+    for ($i = 1; $i <= 3; $i++) {
+        if (empty($_POST['suggestions'][$i]))
+            continue;
+        $data = $_POST['suggestions'][$i];
+        if (!empty($data['title']) && strlen($data['title']) > 50)
+            return 'Validation failed - no presentation/workshop title may exceed 50 characters';
+        if (!empty($data['description']) && strlen($data['description']) > 50)
+            return 'Validation failed - no presentation/workshop description may exceed 50 characters';
+        if (!empty($data['pitch']) && strlen($data['pitch']) > 500)
+            return 'Validation failed - no presentation/workshop pitch may exceed 500 characters';
     }
 
     $sufficientData = !empty($_POST['name']) && !empty($_POST['badge_name']) &&
@@ -275,7 +295,7 @@ function handleForm() {
         return $error;
 
 
-    // TODO: slightly less lazy books
+    // TODO: slightly less lazy both books and suggestions
     // TODO: field limits!
     $removeBooks = $db->prepare('DELETE FROM books_to_stock WHERE panelist_id = :id');
     $removeBooks->execute(array(':id' => $panelist['id']));
@@ -301,6 +321,32 @@ function handleForm() {
             return 'Failed to save book suggestions - please try again or contact support';
         }
     }
+
+    $removeSuggestions = $db->prepare('DELETE FROM panelist_suggestions WHERE panelist_id = :id');
+    $removeSuggestions->execute(array(':id' => $panelist['id']));
+    $suggestions = [];
+    for ($i = 1; $i <= 3; $i++) {
+        if (empty($_POST['suggestions'][$i]))
+            continue;
+        $data = $_POST['suggestions'][$i];
+        if (empty($data['title']) && empty($data['description']) && empty($data['pitch']))
+            continue;
+        array_push(
+            $suggestions, $panelist['id'], $i,
+            $data['title'] ?? '', $data['description'] ?? '', $data['pitch'] ?? ''
+        );
+    }
+    if (count($suggestions)) {
+        $addSuggestions = $db->prepare(
+            'INSERT INTO panelist_suggestions (panelist_id, position, title, description, pitch) VALUES ' .
+            implode(', ', array_fill(0, count($suggestions) / 5, '(?, ?, ?, ?, ?)'))
+        );
+        $addSuggestions->execute($suggestions);
+        if ($addSuggestions->rowCount() !== (count($suggestions) / 5)) {
+            return 'Failed to save presentations/workshops - please try again or contact support';
+        }
+    }
+
 
     // TODO: bad architecture; should do something w/time ranges instead.
     // TODO: remove interested panels when changing availability!
@@ -358,6 +404,13 @@ function bookValue($id, $field) {
         return htmlspecialchars($_POST['books'][$id][$field], ENT_QUOTES);
     if (empty($_POST) && !empty($myBooks[$id]))
         return htmlspecialchars($myBooks[$id][$field], ENT_QUOTES);
+}
+function suggestionValue($id, $field) {
+    global $mySuggestions;
+    if (!empty($_POST['suggestions']) && !empty($_POST['suggestions'][$id]) && !empty($_POST['suggestions'][$id][$field]))
+        return htmlspecialchars($_POST['suggestions'][$id][$field], ENT_QUOTES);
+    if (empty($_POST) && !empty($mySuggestions[$id]))
+        return htmlspecialchars($mySuggestions[$id][$field], ENT_QUOTES);
 }
 function availabilityValue($day, $part) {
     global $myAvailability;
@@ -583,6 +636,25 @@ function booleanForm($name, $required = true) {
         <label>Are you interested in being a judge for an LTUE fiction contest this year? (We would email more specifics before finalizing the group of judges.)</label>
         <?= booleanForm('judge', false) ?>
     </section>
+
+    <!-- TODO: presentation - 3 again -->
+    <p>Do you have a presentation or a workshop that you would like to run? If so, please give us a title, description, and a pitch for the programming. We will contact you with possible time slots in November, if your presentation is selected.</p>
+    <table>
+        <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Pitch</th>
+        </tr>
+        <?php for ($i = 1; $i <= 3; $i++): ?>
+        <tr>
+            <th><?= $i ?>.</th>
+            <td><input type="text" name="suggestions[<?= $i ?>][title]" maxlength=50 value="<?= suggestionValue($i, 'title') ?>" /></td>
+            <td><input type="text" name="suggestions[<?= $i ?>][description]" maxlength=50 value="<?= suggestionValue($i, 'description') ?>" /></td>
+            <td><input type="text" name="suggestions[<?= $i ?>][pitch]" maxlength=500 value="<?= suggestionValue($i, 'pitch') ?>" /></td>
+        </tr>
+        <?php endfor; ?>
+    </table>
 
     <section id="availability">
         <h2>Timeframe Availability<a href="#availability">#</a></h2>
