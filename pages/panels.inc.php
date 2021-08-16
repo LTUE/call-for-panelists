@@ -52,32 +52,32 @@ $panels = array_combine(array_column($panelData, 'id'), $panelData);
 // TODO: see, really bad!
 $panels = array_filter($panels, function($panel) use ($myAvailability) {
     $day = date('l', strtotime($panel['day']));
-    $hour = ltrim(explode(':', $panel['time'])[0], '0') + 0;
-    if ($day === 'Thursday') {
-        if ($hour > 12)
-            return $myAvailability['thu_morn'];
-        else if ($hour > 4)
-            return $myAvailability['thu_day'];
-        else
-            return $myAvailability['thu_even'];
-    } else if ($day === 'Friday') {
-        if ($hour > 12)
-            return $myAvailability['fri_morn'];
-        else if ($hour > 4)
-            return $myAvailability['fri_day'];
-        else
-            return $myAvailability['fri_even'];
-    } else if ($day === 'Saturday') {
-        if ($hour > 12)
-            return $myAvailability['sat_morn'];
-        else if ($hour > 4)
-            return $myAvailability['sat_day'];
-        else
-            return $myAvailability['sat_even'];
-    } else {
+    $prefix = '';
+    switch ($day) {
+    case 'Thursday':
+        $prefix = 'thu';
+        break;
+    case 'Friday':
+        $prefix = 'fri';
+        break;
+    case 'Saturday':
+        $prefix = 'sat';
+        break;
+    default:
         trigger_error('Unknown day ' . $day, E_USER_ERROR);
         return false;
     }
+
+    $hour = ltrim(explode(':', $panel['time'])[0], '0') + 0;
+    $suffix = '';
+    if ($hour < 12) // 9, 10, 11
+        $suffix = 'morn';
+    else if ($hour < 16) // 12, 13, 14, 15
+        $suffix = 'day';
+    else // 16, 17, 18, 19, 20
+        $suffix = 'even';
+
+    return $myAvailability[$prefix . '_' . $suffix];
 });
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['panels']) && is_array($_POST['panels'])) {
