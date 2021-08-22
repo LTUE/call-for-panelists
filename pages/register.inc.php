@@ -18,13 +18,29 @@ function handleForm() {
     if (strlen($_POST['password']) > 128)
         return 'Password is too long to be useful - you only need 256 bits at <em>most</em>.';
 
-    $query = $db->prepare('SELECT * FROM accounts WHERE email = :email');
-    $query->execute(array(':email' => $_POST['email']));
-    $row = $query->fetch(PDO::FETCH_ASSOC);
+    $accountQuery = $db->prepare('SELECT * FROM accounts WHERE email = :email');
+    $accountQuery->execute(array(':email' => $_POST['email']));
+    $row = $accountQuery->fetch(PDO::FETCH_ASSOC);
 
     // email must be unique or warn the user
     if (!empty($row['email'])) {
         return 'It appears that email may have already registered. Try logging in again, or contact support?';
+    }
+
+    // TODO: send email control check before registration so you can take over
+    // a profile, and to protect against fixation-like attacks.
+
+    // Prevent registration with a presented email which already has a profile,
+    // to prevent leaking profiles created w/o an account.
+    // NOTE: It is possible to register an account with a contact email before
+    // a profile is created, if the panelist then continues without an account,
+    // logging in could allow taking over that account. This is a small threat,
+    // but should be closed.
+    $profileQuery = $db->prepare('SELECT * FROM panelists WHERE contact_email = :email');
+    $profileQuery->execute(array(':email' => $_POST['email']));
+    $row = $profileQuery->fetch(PDO::FETCH_ASSOC);
+    if (!empty($row['contact_email'])) {
+        return 'There is already a profile with that email. Please update it using a magic link.';
     }
 
     $create = $db->prepare('INSERT INTO accounts SET email = :email, password = :password, type = :type');
@@ -37,8 +53,8 @@ function handleForm() {
         return 'We failed to create your account. I don\'t know why. Try again?';
     }
 
-    $query->execute(array(':email' => $_POST['email']));
-    $row = $query->fetch(PDO::FETCH_ASSOC);
+    $accountQuery->execute(array(':email' => $_POST['email']));
+    $row = $accountQuery->fetch(PDO::FETCH_ASSOC);
     if (empty($row['email'])) {
         return 'Account created - please log in to continue';
     }
