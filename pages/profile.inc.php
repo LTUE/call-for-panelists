@@ -21,6 +21,27 @@ if (!empty($_SESSION['panelist_id'])) {
     $panelist = $getPanelistFromAccount->fetch(PDO::FETCH_ASSOC);
     if (!empty($panelist)) {
         $_SESSION['panelist_id'] = $panelist['id'];
+    } else {
+        // Try a little harder to find a profile...
+        $getPanelistByAccountEmail = $db->prepare(
+            'SELECT panelists.* FROM accounts' .
+            ' LEFT JOIN panelists ON panelists.contact_email = accounts.email' .
+            ' WHERE accounts.id = :account_id ORDER BY updated DESC LIMIT 1'
+        );
+        $getPanelistByAccountEmail->execute(array(':account_id' => $_SESSION['account_id']));
+        $panelist = $getPanelistByAccountEmail->fetch(PDO::FETCH_ASSOC);
+        if (!empty($panelist)) {
+            $_SESSION['panelist_id'] = $panelist['id'];
+            $updatePanelistAccountId = $db->prepare(
+                'UPDATE panelists SET account_id = :account_id WHERE id = :id'
+            );
+            $updatePanelistAccountId->execute(array(
+                ':account_id' => $_SESSION['account_id'],
+                ':id' => $panelist['id'],
+            ));
+            if ($updatePanelistAccountId->rowCount() !== 1)
+                return 'We failed to repair your profile. Please contact support.';
+        }
     }
 }
 

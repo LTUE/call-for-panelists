@@ -45,8 +45,8 @@ function handleForm() {
         if (!empty($row)) {
             $id = $row['id'];
         } else {
-            // TODO: there can be multiple!
-            $pquery = $db->prepare('SELECT * FROM panelists WHERE contact_email = :email ORDER BY id DESC');
+            // There can be multiple - use the most recently updated
+            $pquery = $db->prepare('SELECT * FROM panelists WHERE contact_email = :email ORDER BY updated DESC');
             $pquery->execute(array(':email' => $_POST['email']));
             $panelist = $pquery->fetch(PDO::FETCH_ASSOC);
 
