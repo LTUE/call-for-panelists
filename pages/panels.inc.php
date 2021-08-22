@@ -195,4 +195,12 @@ function prettyTime($time) {
     </section>
 <?php endforeach; ?>
     <input type="submit" value="Update Panel Selection">
+<?php
+    $count = array_reduce($panels, function($carry, $panel) {
+        if ($panel['panel_roles_id'] !== null && $panel['panel_experience_id'] !== null)
+            $carry++;
+        return $carry;
+    }, 0);
+?>
+    <p>You will be considered for <?= $count ?> panel<?= $count <> 1 ? 's' : '' ?>.</p>
 </form>
