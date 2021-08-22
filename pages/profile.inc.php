@@ -25,7 +25,7 @@ if (!empty($_SESSION['panelist_id'])) {
         // Try a little harder to find a profile...
         $getPanelistByAccountEmail = $db->prepare(
             'SELECT panelists.* FROM accounts' .
-            ' LEFT JOIN panelists ON panelists.contact_email = accounts.email' .
+            ' JOIN panelists ON panelists.contact_email = accounts.email' .
             ' WHERE accounts.id = :account_id ORDER BY updated DESC LIMIT 1'
         );
         $getPanelistByAccountEmail->execute(array(':account_id' => $_SESSION['account_id']));
@@ -40,7 +40,7 @@ if (!empty($_SESSION['panelist_id'])) {
                 ':id' => $panelist['id'],
             ));
             if ($updatePanelistAccountId->rowCount() !== 1)
-                return 'We failed to repair your profile. Please contact support.';
+                die('We failed to repair your profile. Please contact support.');
         }
     }
 }
