@@ -487,6 +487,7 @@ function booleanForm($name, $required = true) {
 
 <?php $year = 2022; /* TODO: auto-calculate */ ?>
 <p>Welcome to the <?= $year; ?> LTUE Call for Panelists! Please sign up for panels for which you are interested and qualified. Please note that expressing interest will not automatically put you on a panel. As we create our schedule, we will notify you if/when you have been selected for a panel.</p>
+<p>We welcome suggestions and changes. Please use the section below to enter these so we can improve our programming this year.</p>
 <p>We’re committed to the health and safety of our attendees and presenters at LTUE. We also want everyone onsite to feel as safe as possible both health-wise and in behavior. We will observe Utah State and Marriott Hotel guidelines and will continuing working with those officials and staff to make sure we maintain necessary precautions.  At this time, we will require masks while continuing to monitor the need to adjust this as we get closer to February.</p>
 <p><strong>This Call for Panelists will close on September 8<sup>th</sup>.</strong> We will begin contacting those who have been selected for panels in November.</p>
 <p>LTUE is Thurday Feb. 17<sup>th</sup> to Saturday Feb. 19<sup>th</sup>, 2022.</p>
